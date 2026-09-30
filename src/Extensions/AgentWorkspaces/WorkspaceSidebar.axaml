@@ -26,28 +26,21 @@
     </Style>
   </UserControl.Styles>
 
-  <Border Background="{DynamicResource Brush.SubPanel}" BorderThickness="0,0,1,0" BorderBrush="{DynamicResource Brush.Border0}">
+  <Grid ColumnDefinitions="*,Auto">
+  <Border Grid.Column="0" Width="{Binding PanelWidth}" Background="{DynamicResource Brush.SubPanel}" BorderThickness="0,0,1,0" BorderBrush="{DynamicResource Brush.Border0}">
     <Grid RowDefinitions="28,*,Auto">
-      <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
-        <TextBlock Grid.Column="0"
-                   Classes="group_header_label"
-                   Margin="8,0,0,0"
-                   VerticalAlignment="Center"
-                   Text="AGENT WORKSPACES"
-                   IsVisible="{Binding IsExpanded}"/>
-        <Button Grid.Column="1"
-                Classes="icon_button"
-                Width="32"
-                Click="OnToggleExpanded"
-                ToolTip.Tip="Collapse/expand">
-          <Path Width="14" Height="14" Data="{StaticResource Icons.Tabs}"/>
-        </Button>
-      </Grid>
+      <TextBlock Grid.Row="0"
+                 Classes="group_header_label"
+                 Margin="8,0,0,0"
+                 VerticalAlignment="Center"
+                 TextTrimming="CharacterEllipsis"
+                 Text="AGENT WORKSPACES"
+                 IsVisible="{Binding IsExpanded}"/>
 
-      <TextBlock Grid.Row="1" Classes="small" Margin="8,4,8,0" Width="224" TextWrapping="Wrap" VerticalAlignment="Top"
+      <TextBlock Grid.Row="1" Classes="small" Margin="8,4,8,0" TextWrapping="Wrap" VerticalAlignment="Top"
                  Foreground="{DynamicResource Brush.FG2}"
                  Text="No agent workspaces yet. Ask an agent to show its changes in SourceGit and it will appear here."
-                 IsVisible="{Binding !HasItems}"/>
+                 IsVisible="{Binding ShowEmptyHint}"/>
 
       <ScrollViewer Grid.Row="1">
         <ItemsControl ItemsSource="{Binding Items}">
@@ -56,7 +49,7 @@
               <Grid Classes="ws_item" Classes.active="{Binding Workspace.IsActive}" Tapped="OnItemTapped" ToolTip.Tip="{Binding Workspace.Name}">
                 <Border x:Name="PART_Background" Background="Transparent" Opacity="0"/>
 
-                <Grid Width="240" Margin="0,4" ColumnDefinitions="Auto,*" IsVisible="{Binding $parent[ItemsControl].((ext:AgentMode)DataContext).IsExpanded}">
+                <Grid Margin="0,4" ColumnDefinitions="Auto,*" IsVisible="{Binding $parent[ItemsControl].((ext:AgentMode)DataContext).IsExpanded}">
                   <Border Grid.Column="0" Width="3" Margin="6,0,8,0" CornerRadius="2" Background="{Binding Workspace.Brush}"/>
                   <StackPanel Grid.Column="1" Margin="0,0,8,0">
                     <TextBlock Classes="ws_name" Text="{Binding Workspace.Name}" TextTrimming="CharacterEllipsis"/>
@@ -76,7 +69,7 @@
 
       <!-- Review -->
       <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource Brush.Border0}" IsVisible="{Binding HasItems}">
-        <Grid RowDefinitions="28,Auto,Auto,Auto,Auto" Width="240" Margin="8,0,8,8" IsVisible="{Binding IsExpanded}">
+        <Grid RowDefinitions="28,Auto,Auto,Auto,Auto" Margin="8,0,8,8" IsVisible="{Binding IsExpanded}">
           <TextBlock Grid.Row="0" Classes="group_header_label" VerticalAlignment="Center" Text="REVIEW"/>
 
           <TextBlock Grid.Row="1" Classes="small" Margin="0,0,0,6" TextWrapping="Wrap" Foreground="{DynamicResource Brush.FG2}"
@@ -89,7 +82,7 @@
                 <DataTemplate DataType="ext:ReviewComment">
                   <Border Margin="0,0,0,4" Padding="6,4" CornerRadius="3" Background="{DynamicResource Brush.Contents}" BorderThickness="1" BorderBrush="{DynamicResource Brush.Border2}">
                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
-                      <TextBlock Grid.Row="0" Grid.Column="0" Classes="small bold" Text="{Binding Title}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Snippet}"/>
+                      <TextBlock Grid.Row="0" Grid.Column="0" Classes="small bold" Text="{Binding Label}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Snippet}"/>
                       <Button Grid.Row="0" Grid.Column="1" Classes="icon_button" Width="16" Click="OnRemoveComment" ToolTip.Tip="Remove">
                         <Path Width="10" Height="10" Data="{StaticResource Icons.Close}"/>
                       </Button>
@@ -134,4 +127,9 @@
       </Border>
     </Grid>
   </Border>
+
+  <Border Grid.Column="1" Width="4" Margin="-2,0,-2,0" Background="Transparent" Cursor="SizeWestEast"
+          PointerPressed="OnResizePressed" PointerMoved="OnResizeMoved" PointerReleased="OnResizeReleased"
+          ToolTip.Tip="Drag to resize, far left to collapse"/>
+  </Grid>
 </UserControl>

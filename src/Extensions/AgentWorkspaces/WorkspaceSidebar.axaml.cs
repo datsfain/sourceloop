@@ -18,11 +18,36 @@ namespace SourceGit.Extensions.AgentWorkspaces
             DataContext = AgentMode.Instance;
         }
 
-        private void OnToggleExpanded(object sender, RoutedEventArgs e)
+        private void OnResizePressed(object sender, PointerPressedEventArgs e)
         {
-            AgentMode.Instance.IsExpanded = !AgentMode.Instance.IsExpanded;
+            if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+                return;
+
+            _isResizing = true;
+            e.Pointer.Capture(sender as IInputElement);
             e.Handled = true;
         }
+
+        private void OnResizeMoved(object sender, PointerEventArgs e)
+        {
+            if (!_isResizing)
+                return;
+
+            AgentMode.Instance.ResizeTo(e.GetPosition(this).X);
+            e.Handled = true;
+        }
+
+        private void OnResizeReleased(object sender, PointerReleasedEventArgs e)
+        {
+            if (!_isResizing)
+                return;
+
+            _isResizing = false;
+            e.Pointer.Capture(null);
+            AgentMode.Instance.SaveWidth();
+            e.Handled = true;
+        }
+
 
         private void OnRemoveComment(object sender, RoutedEventArgs e)
         {
@@ -45,5 +70,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
             e.Handled = true;
         }
+
+        private bool _isResizing;
     }
 }

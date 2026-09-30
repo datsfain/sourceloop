@@ -10,7 +10,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
 {
     public record ReviewComment(string Repo, string File, string Location, string Snippet, string Text, bool IsDiff = true)
     {
-        public string Title => string.IsNullOrEmpty(File) ? $"{Path.GetFileName(Repo)}{Location}" : $"{Path.GetFileName(Repo)}/{File}{Location}";
+        public string Label => string.IsNullOrEmpty(File) ? Location.Trim(' ', '(', ')') : File + Location;
     }
 
     public static class Review
@@ -32,7 +32,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
             }
 
             if (!option.IsLocalChange)
-                range += " @ " + string.Join("..", option.Revisions.Select(Short));
+                range += " @ " + FormatRevisions(option.Revisions);
 
             var snippet = new StringBuilder();
             foreach (var line in selected.Take(60))
@@ -66,15 +66,21 @@ namespace SourceGit.Extensions.AgentWorkspaces
             if (comments.Count > 0)
                 builder.Append("\n# Comments:\n");
 
-            for (var i = 0; i < comments.Count; i++)
+            var number = 0;
+            foreach (var group in comments.GroupBy(c => c.Repo))
             {
-                var c = comments[i];
-                if (i > 0)
-                    builder.Append('\n');
-                builder.Append(i + 1).Append(". ").Append(c.Title).Append('\n');
-                if (c.IsDiff || string.IsNullOrEmpty(c.File))
-                    builder.Append(c.IsDiff ? "```diff\n" : "```\n").Append(c.Snippet).Append("\n```\n");
-                builder.Append(c.Text.Trim()).Append('\n');
+                builder.Append("\n## ").Append(group.Key).Append('\n');
+                var isFirst = true;
+                foreach (var c in group)
+                {
+                    if (!isFirst)
+                        builder.Append('\n');
+                    isFirst = false;
+                    builder.Append(++number).Append(". ").Append(c.Label).Append('\n');
+                    if (c.IsDiff || string.IsNullOrEmpty(c.File))
+                        builder.Append(c.IsDiff ? "```diff\n" : "```\n").Append(c.Snippet).Append("\n```\n");
+                    builder.Append(c.Text.Trim()).Append('\n');
+                }
             }
 
             return builder.ToString().TrimEnd('\n');
@@ -108,9 +114,20 @@ namespace SourceGit.Extensions.AgentWorkspaces
             return min == max ? $"{min}" : $"{min}-{max}";
         }
 
+        private static string FormatRevisions(List<string> revisions)
+        {
+            // A single commit is diffed against its parent (or the empty tree for a root commit).
+            if (revisions.Count == 2 && (revisions[0] == $"{revisions[1]}^" || revisions[0] == Models.EmptyTreeHash.Guess(revisions[1])))
+                return Short(revisions[1]);
+
+            return string.Join("..", revisions.Select(Short));
+        }
+
+        // Shortens a leading full SHA, keeping any suffix such as "^" or ":path".
         private static string Short(string revision)
         {
-            return revision.Length > 10 ? revision[..10] : revision;
+            var hex = revision.TakeWhile(char.IsAsciiHexDigit).Count();
+            return hex >= 40 ? revision[..10] + revision[hex..] : revision;
         }
     }
 }

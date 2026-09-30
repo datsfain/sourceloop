@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,9 +36,14 @@ namespace SourceGit.Extensions.AgentWorkspaces
                         File.Delete(CollapsedFlagFile);
                     else
                         File.WriteAllText(CollapsedFlagFile, string.Empty);
+
+                    OnPropertyChanged(nameof(PanelWidth));
+                    OnPropertyChanged(nameof(ShowEmptyHint));
                 }
             }
         }
+
+        public double PanelWidth => _isExpanded ? _width : CollapsedWidth;
 
         public List<AgentWorkspaceItem> Items
         {
@@ -45,11 +51,16 @@ namespace SourceGit.Extensions.AgentWorkspaces
             private set
             {
                 if (SetProperty(ref _items, value))
+                {
                     OnPropertyChanged(nameof(HasItems));
+                    OnPropertyChanged(nameof(ShowEmptyHint));
+                }
             }
         }
 
         public bool HasItems => _items.Count > 0;
+
+        public bool ShowEmptyHint => _isExpanded && _items.Count == 0;
 
         public AvaloniaList<ReviewComment> Comments
         {
@@ -85,6 +96,8 @@ namespace SourceGit.Extensions.AgentWorkspaces
             AgentRegistry.Changed += Refresh;
 
             _isExpanded = !File.Exists(CollapsedFlagFile);
+            if (File.Exists(WidthFile) && double.TryParse(File.ReadAllText(WidthFile), CultureInfo.InvariantCulture, out var width))
+                _width = Math.Clamp(width, MinWidth, MaxWidth);
             _launcher = App.GetLauncher();
             _launcher.PropertyChanged += OnLauncherPropertyChanged;
             Refresh();
@@ -142,6 +155,22 @@ namespace SourceGit.Extensions.AgentWorkspaces
         {
             _comments.Remove(comment);
             OnPropertyChanged(nameof(CanSubmitReview));
+        }
+
+        // Dragging below the threshold collapses the panel; dragging back out expands it again.
+        public void ResizeTo(double width)
+        {
+            IsExpanded = width >= CollapseBelow;
+            if (!_isExpanded)
+                return;
+
+            _width = Math.Clamp(width, MinWidth, MaxWidth);
+            OnPropertyChanged(nameof(PanelWidth));
+        }
+
+        public void SaveWidth()
+        {
+            File.WriteAllText(WidthFile, _width.ToString(CultureInfo.InvariantCulture));
         }
 
         public async Task SubmitReviewAsync()
@@ -254,12 +283,19 @@ namespace SourceGit.Extensions.AgentWorkspaces
         }
 
         private static string CollapsedFlagFile => Path.Combine(AgentRegistry.Dir, ".sidebar-collapsed");
+        private static string WidthFile => Path.Combine(AgentRegistry.Dir, ".sidebar-width");
+
+        private const double CollapsedWidth = 33;
+        private const double CollapseBelow = 56;
+        private const double MinWidth = 72;
+        private const double MaxWidth = 640;
 
         private static AgentMode s_instance;
 
         private readonly ViewModels.Launcher _launcher;
         private bool _isActive;
         private bool _isExpanded;
+        private double _width = 257;
         private List<AgentWorkspaceItem> _items = [];
         private ViewModels.Workspace _lastNormal;
         private ViewModels.Workspace _lastAgent;

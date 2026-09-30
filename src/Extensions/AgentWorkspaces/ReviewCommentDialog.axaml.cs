@@ -14,7 +14,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         public ReviewCommentDialog(ReviewComment draft) : this()
         {
-            TxtLocation.Text = draft.Title;
+            TxtLocation.Text = draft.Label;
             TxtSnippet.Text = draft.Snippet;
         }
 
