@@ -14,8 +14,12 @@
       <Setter Property="Opacity" Value=".5"/>
     </Style>
     <Style Selector="Grid.ws_item.active Border#PART_Background">
-      <Setter Property="Background" Value="{DynamicResource Brush.AccentHovered}"/>
-      <Setter Property="Opacity" Value="1"/>
+      <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
+      <Setter Property="Opacity" Value=".65"/>
+    </Style>
+    <Style Selector="Grid.ws_item.active:pointerover Border#PART_Background">
+      <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
+      <Setter Property="Opacity" Value=".8"/>
     </Style>
     <Style Selector="Grid.ws_item.active TextBlock.ws_name">
       <Setter Property="FontWeight" Value="Bold"/>
@@ -39,6 +43,11 @@
           <Path Width="14" Height="14" Data="{StaticResource Icons.Tabs}"/>
         </Button>
       </Grid>
+
+      <TextBlock Grid.Row="1" Classes="small" Margin="8,4,8,0" Width="224" TextWrapping="Wrap" VerticalAlignment="Top"
+                 Foreground="{DynamicResource Brush.FG2}"
+                 Text="No agent workspaces yet. Ask an agent to show its changes in SourceGit and it will appear here."
+                 IsVisible="{Binding !HasItems}"/>
 
       <ScrollViewer Grid.Row="1">
         <ItemsControl ItemsSource="{Binding Items}">
@@ -66,8 +75,8 @@
       </ScrollViewer>
 
       <!-- Review -->
-      <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource Brush.Border0}" IsVisible="{Binding IsExpanded}">
-        <Grid RowDefinitions="28,Auto,Auto,Auto,Auto" Width="240" Margin="8,0,8,8">
+      <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource Brush.Border0}" IsVisible="{Binding HasItems}">
+        <Grid RowDefinitions="28,Auto,Auto,Auto,Auto" Width="240" Margin="8,0,8,8" IsVisible="{Binding IsExpanded}">
           <TextBlock Grid.Row="0" Classes="group_header_label" VerticalAlignment="Center" Text="REVIEW"/>
 
           <TextBlock Grid.Row="1" Classes="small" Margin="0,0,0,6" TextWrapping="Wrap" Foreground="{DynamicResource Brush.FG2}"

@@ -16,7 +16,6 @@
   <Button Classes="icon_button agent_mode"
           Classes.on="{Binding IsActive}"
           Width="26" Height="22" CornerRadius="4"
-          IsEnabled="{Binding CanToggle}"
           Click="OnToggle"
           HotKey="{OnPlatform Ctrl+Alt+A, macOS=⌘+Alt+A}"
           ToolTip.Tip="Agent mode (Ctrl+Alt+A)">

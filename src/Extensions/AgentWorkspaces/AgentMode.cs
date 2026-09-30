@@ -45,11 +45,11 @@ namespace SourceGit.Extensions.AgentWorkspaces
             private set
             {
                 if (SetProperty(ref _items, value))
-                    OnPropertyChanged(nameof(CanToggle));
+                    OnPropertyChanged(nameof(HasItems));
             }
         }
 
-        public bool CanToggle => _isActive || _items.Count > 0;
+        public bool HasItems => _items.Count > 0;
 
         public AvaloniaList<ReviewComment> Comments
         {
@@ -85,7 +85,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
             if (_isActive)
                 Activate(_lastNormal ?? ViewModels.Preferences.Instance.GetActiveWorkspace());
             else
-                Activate(AgentRegistry.IsAgentWorkspace(_lastAgent) ? _lastAgent : AgentRegistry.Workspaces.FirstOrDefault());
+                Activate(AgentRegistry.IsAgentWorkspace(_lastAgent) ? _lastAgent : AgentRegistry.Workspaces.FirstOrDefault() ?? _empty);
         }
 
         public void Activate(ViewModels.Workspace to)
@@ -96,12 +96,13 @@ namespace SourceGit.Extensions.AgentWorkspaces
             var normal = _isActive ? _lastNormal : _launcher.ActiveWorkspace;
             foreach (var w in AgentRegistry.Workspaces)
                 w.IsActive = false;
+            _empty.IsActive = false;
             if (normal != null)
                 normal.IsActive = false;
 
             _launcher.SwitchWorkspace(to);
 
-            if (!AgentRegistry.IsAgentWorkspace(to))
+            if (!IsAgent(to))
                 return;
 
             // Keep the normal workspace marked active so it is the one restored on next startup.
@@ -164,11 +165,11 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 .Select(w => new AgentWorkspaceItem(w, string.Join(" · ", w.Repositories.Select(Path.GetFileName))))
                 .ToList();
 
-            var isRemovedAgentWorkspace = active != null && !AgentRegistry.IsAgentWorkspace(active) && !ViewModels.Preferences.Instance.Workspaces.Contains(active);
+            var isRemovedAgentWorkspace = active != null && !IsAgent(active) && !ViewModels.Preferences.Instance.Workspaces.Contains(active);
             if (isRemovedAgentWorkspace)
-                Activate(AgentRegistry.Workspaces.FirstOrDefault() ?? _lastNormal);
+                Activate(AgentRegistry.Workspaces.FirstOrDefault() ?? _empty);
             else
-                IsActive = AgentRegistry.IsAgentWorkspace(active);
+                IsActive = IsAgent(active);
 
             var review = AgentRegistry.IsAgentWorkspace(_launcher.ActiveWorkspace) ? _launcher.ActiveWorkspace : null;
             if (review != _reviewWorkspace)
@@ -195,6 +196,11 @@ namespace SourceGit.Extensions.AgentWorkspaces
         {
             if (e.PropertyName is nameof(ViewModels.Launcher.ActiveWorkspace) or nameof(ViewModels.Launcher.ActivePage))
                 Refresh();
+        }
+
+        private bool IsAgent(ViewModels.Workspace workspace)
+        {
+            return workspace == _empty || AgentRegistry.IsAgentWorkspace(workspace);
         }
 
         private static void ShowFirstLocalChange(ViewModels.Repository repo)
@@ -245,6 +251,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
         private ViewModels.Workspace _lastNormal;
         private ViewModels.Workspace _lastAgent;
         private ViewModels.Workspace _reviewWorkspace;
+        private readonly ViewModels.Workspace _empty = new() { Name = "Agents" };
         private AvaloniaList<ReviewComment> _comments = [];
         private string _reviewSummary = string.Empty;
         private string _reviewStatus;
