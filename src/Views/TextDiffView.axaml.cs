@@ -706,6 +706,7 @@ namespace SourceGit.Views
             var menu = new ContextMenu();
             menu.Items.Add(copy);
             menu.Items.Add(copyAsPatch);
+            Extensions.ExtensionHost.ExtendDiffContextMenu(this, GetLines(), IsOld, menu);
             menu.Open(TextArea.TextView);
 
             e.Handled = true;

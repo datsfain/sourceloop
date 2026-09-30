@@ -5,6 +5,7 @@
                     xmlns:s="using:SourceGit"
                     xmlns:vm="using:SourceGit.ViewModels"
                     xmlns:v="using:SourceGit.Views"
+                    xmlns:ext="using:SourceGit.Extensions"
                     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                     x:Class="SourceGit.Views.Launcher"
                     x:DataType="vm:Launcher"
@@ -19,9 +20,9 @@
     </Grid.RowDefinitions>
 
     <!-- Custom TitleBar -->
-    <Grid Grid.Row="0" ColumnDefinitions="Auto,32,32,*,Auto,Auto">
+    <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,32,32,*,Auto,Auto">
       <!-- Bottom border -->
-      <Border Grid.Column="0" Grid.ColumnSpan="6"
+      <Border Grid.Column="0" Grid.ColumnSpan="7"
               BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border0}"
               Background="{DynamicResource Brush.TitleBar}"
               DoubleTapped="MaximizeOrRestoreWindow"
@@ -87,8 +88,11 @@
         <Path Width="12" Height="12" Data="{StaticResource Icons.Menu}"/>
       </Button>
 
+      <!-- Extensions -->
+      <v:ExtensionSlot Grid.Column="1" Point="{x:Static ext:ExtensionPoint.LauncherTitleBar}" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="0,0,0,4"/>
+
       <!-- Workspace Dropdown Menu -->
-      <Button Grid.Column="1" Classes="icon_button" VerticalAlignment="Bottom" Margin="0,0,0,1" Click="OnOpenWorkspaceMenu" HotKey="{OnPlatform Ctrl+Alt+P, macOS=⌘+Alt+P}">
+      <Button Grid.Column="2" Classes="icon_button" VerticalAlignment="Bottom" Margin="0,0,0,1" Click="OnOpenWorkspaceMenu" HotKey="{OnPlatform Ctrl+Alt+P, macOS=⌘+Alt+P}">
         <ToolTip.Tip>
           <StackPanel Orientation="Horizontal">
             <TextBlock Text="{DynamicResource Text.Workspace}" FontWeight="Bold" Foreground="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForeground}"/>
@@ -106,7 +110,7 @@
       </Button>
 
       <!-- Pages Switcher Toggle Button -->
-      <Button Grid.Column="2" Classes="icon_button" VerticalAlignment="Bottom" Margin="0,0,0,1" Click="OnOpenPagesCommandPalette" HotKey="{OnPlatform Ctrl+P, macOS=⌘+P}">
+      <Button Grid.Column="3" Classes="icon_button" VerticalAlignment="Bottom" Margin="0,0,0,1" Click="OnOpenPagesCommandPalette" HotKey="{OnPlatform Ctrl+P, macOS=⌘+P}">
         <ToolTip.Tip>
           <StackPanel Orientation="Horizontal">
             <TextBlock Text="{DynamicResource Text.Launcher.Pages}"
@@ -122,10 +126,10 @@
       </Button>
 
       <!-- Pages Tabs -->
-      <v:LauncherTabBar Grid.Column="3" Height="30" Margin="0,0,16,0" VerticalAlignment="Bottom"/>
+      <v:LauncherTabBar Grid.Column="4" Height="30" Margin="0,0,16,0" VerticalAlignment="Bottom"/>
 
       <!-- Update Available Button -->
-      <Button Grid.Column="4"
+      <Button Grid.Column="5"
               Classes="icon_button"
               Height="30"
               Margin="0,0,4,0"
@@ -137,19 +141,22 @@
       </Button>
 
       <!-- Caption Buttons (Windows/Linux) -->
-      <Border Grid.Column="5" IsVisible="{Binding #ThisControl.HasRightCaptionButton}">
+      <Border Grid.Column="6" IsVisible="{Binding #ThisControl.HasRightCaptionButton}">
         <v:CaptionButtons Height="30" VerticalAlignment="Top"/>
       </Border>
     </Grid>
 
     <!-- Page -->
-    <ContentControl Grid.Row="1" Content="{Binding ActivePage}" Background="{DynamicResource Brush.Window}">
-      <ContentControl.DataTemplates>
-        <DataTemplate DataType="vm:LauncherPage">
-          <v:LauncherPage/>
-        </DataTemplate>
-      </ContentControl.DataTemplates>
-    </ContentControl>
+    <Grid Grid.Row="1" ColumnDefinitions="Auto,*">
+      <v:ExtensionSlot Grid.Column="0" Point="{x:Static ext:ExtensionPoint.LauncherSidePanel}" Orientation="Horizontal"/>
+      <ContentControl Grid.Column="1" Content="{Binding ActivePage}" Background="{DynamicResource Brush.Window}">
+        <ContentControl.DataTemplates>
+          <DataTemplate DataType="vm:LauncherPage">
+            <v:LauncherPage/>
+          </DataTemplate>
+        </ContentControl.DataTemplates>
+      </ContentControl>
+    </Grid>
 
     <!-- Command Palette -->
     <Border Grid.Row="0" Grid.RowSpan="2"
