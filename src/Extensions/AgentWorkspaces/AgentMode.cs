@@ -54,14 +54,24 @@ namespace SourceGit.Extensions.AgentWorkspaces
         public AvaloniaList<ReviewComment> Comments
         {
             get => _comments;
-            private set => SetProperty(ref _comments, value);
+            private set
+            {
+                if (SetProperty(ref _comments, value))
+                    OnPropertyChanged(nameof(CanSubmitReview));
+            }
         }
 
         public string ReviewSummary
         {
             get => _reviewSummary;
-            set => SetProperty(ref _reviewSummary, value);
+            set
+            {
+                if (SetProperty(ref _reviewSummary, value))
+                    OnPropertyChanged(nameof(CanSubmitReview));
+            }
         }
+
+        public bool CanSubmitReview => _comments.Count > 0 || !string.IsNullOrWhiteSpace(_reviewSummary);
 
         public string ReviewStatus
         {
@@ -125,18 +135,20 @@ namespace SourceGit.Extensions.AgentWorkspaces
         {
             _comments.Add(comment);
             ReviewStatus = null;
+            OnPropertyChanged(nameof(CanSubmitReview));
         }
 
         public void RemoveComment(ReviewComment comment)
         {
             _comments.Remove(comment);
+            OnPropertyChanged(nameof(CanSubmitReview));
         }
 
         public async Task SubmitReviewAsync()
         {
             var workspace = _launcher.ActiveWorkspace;
             var socket = AgentRegistry.GetSocket(workspace);
-            if (_comments.Count == 0)
+            if (!CanSubmitReview)
                 return;
 
             if (string.IsNullOrEmpty(socket))
@@ -147,10 +159,11 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
             try
             {
-                await Review.SendAsync(socket, Review.Format(workspace.Name, [.. _comments], _reviewSummary));
-                ReviewStatus = $"Sent {_comments.Count} comment(s) to the agent.";
+                await Review.SendAsync(socket, Review.Format([.. _comments], _reviewSummary));
+                ReviewStatus = _comments.Count > 0 ? $"Sent {_comments.Count} comment(s) to the agent." : "Sent the note to the agent.";
                 _comments.Clear();
                 ReviewSummary = string.Empty;
+                OnPropertyChanged(nameof(CanSubmitReview));
             }
             catch (Exception e)
             {

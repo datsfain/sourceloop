@@ -108,12 +108,12 @@
 
           <StackPanel Grid.Row="4">
             <Button Classes="flat primary" Height="28" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                    IsEnabled="{Binding Comments.Count}"
+                    IsEnabled="{Binding CanSubmitReview}"
                     HotKey="{OnPlatform Ctrl+Alt+S, macOS=⌘+Alt+S}"
                     Click="OnSubmitReview">
               <ToolTip.Tip>
                 <StackPanel Orientation="Horizontal">
-                  <TextBlock Text="Send all comments to the agent" VerticalAlignment="Center"/>
+                  <TextBlock Text="Send the review to the agent" VerticalAlignment="Center"/>
                   <TextBlock Margin="8,0,0,0"
                              Text="{OnPlatform Ctrl+Alt+S, macOS=⌘+Alt+S}"
                              FontSize="11"

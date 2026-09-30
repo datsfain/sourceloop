@@ -139,7 +139,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 anchor.FindAncestorOfType<Views.Repository>()?.DataContext is not ViewModels.Repository repo)
                 return;
 
-            await ShowDialogAsync(anchor, Review.CreateFileDraft(repo.FullPath, selected.Changes, isUnstaged));
+            await ShowDialogAsync(anchor, Review.CreateFileDraft(repo.FullPath, selected.Changes));
         }
 
         private static async Task AddCommentAsync(Control anchor, List<Models.TextDiffLine> lines)
