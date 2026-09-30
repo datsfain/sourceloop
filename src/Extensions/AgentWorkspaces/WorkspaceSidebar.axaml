@@ -1,0 +1,128 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ext="using:SourceGit.Extensions.AgentWorkspaces"
+             x:Class="SourceGit.Extensions.AgentWorkspaces.WorkspaceSidebar"
+             x:DataType="ext:AgentMode"
+             IsVisible="{Binding IsActive}">
+  <UserControl.Styles>
+    <Style Selector="Grid.ws_item">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Grid.ws_item:pointerover Border#PART_Background">
+      <Setter Property="Background" Value="{DynamicResource Brush.AccentHovered}"/>
+      <Setter Property="Opacity" Value=".5"/>
+    </Style>
+    <Style Selector="Grid.ws_item.active Border#PART_Background">
+      <Setter Property="Background" Value="{DynamicResource Brush.AccentHovered}"/>
+      <Setter Property="Opacity" Value="1"/>
+    </Style>
+    <Style Selector="Grid.ws_item.active TextBlock.ws_name">
+      <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Border Background="{DynamicResource Brush.SubPanel}" BorderThickness="0,0,1,0" BorderBrush="{DynamicResource Brush.Border0}">
+    <Grid RowDefinitions="28,*,Auto">
+      <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+        <TextBlock Grid.Column="0"
+                   Classes="group_header_label"
+                   Margin="8,0,0,0"
+                   VerticalAlignment="Center"
+                   Text="AGENT WORKSPACES"
+                   IsVisible="{Binding IsExpanded}"/>
+        <Button Grid.Column="1"
+                Classes="icon_button"
+                Width="32"
+                Click="OnToggleExpanded"
+                ToolTip.Tip="Collapse/expand">
+          <Path Width="14" Height="14" Data="{StaticResource Icons.Tabs}"/>
+        </Button>
+      </Grid>
+
+      <ScrollViewer Grid.Row="1">
+        <ItemsControl ItemsSource="{Binding Items}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="ext:AgentWorkspaceItem">
+              <Grid Classes="ws_item" Classes.active="{Binding Workspace.IsActive}" Tapped="OnItemTapped" ToolTip.Tip="{Binding Workspace.Name}">
+                <Border x:Name="PART_Background" Background="Transparent" Opacity="0"/>
+
+                <Grid Width="240" Margin="0,4" ColumnDefinitions="Auto,*" IsVisible="{Binding $parent[ItemsControl].((ext:AgentMode)DataContext).IsExpanded}">
+                  <Border Grid.Column="0" Width="3" Margin="6,0,8,0" CornerRadius="2" Background="{Binding Workspace.Brush}"/>
+                  <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                    <TextBlock Classes="ws_name" Text="{Binding Workspace.Name}" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Classes="small" Text="{Binding RepoNames}" Foreground="{DynamicResource Brush.FG2}" TextTrimming="CharacterEllipsis"/>
+                  </StackPanel>
+                </Grid>
+
+                <Path Width="14" Height="14" Margin="9,7"
+                      Data="{StaticResource Icons.Workspace}"
+                      Fill="{Binding Workspace.Brush}"
+                      IsVisible="{Binding !$parent[ItemsControl].((ext:AgentMode)DataContext).IsExpanded}"/>
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+
+      <!-- Review -->
+      <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource Brush.Border0}" IsVisible="{Binding IsExpanded}">
+        <Grid RowDefinitions="28,Auto,Auto,Auto,Auto" Width="240" Margin="8,0,8,8">
+          <TextBlock Grid.Row="0" Classes="group_header_label" VerticalAlignment="Center" Text="REVIEW"/>
+
+          <TextBlock Grid.Row="1" Classes="small" Margin="0,0,0,6" TextWrapping="Wrap" Foreground="{DynamicResource Brush.FG2}"
+                     Text="Hover a change, select lines or select files, then press C to comment."
+                     IsVisible="{Binding !Comments.Count}"/>
+
+          <ScrollViewer Grid.Row="2" MaxHeight="320">
+            <ItemsControl ItemsSource="{Binding Comments}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="ext:ReviewComment">
+                  <Border Margin="0,0,0,4" Padding="6,4" CornerRadius="3" Background="{DynamicResource Brush.Contents}" BorderThickness="1" BorderBrush="{DynamicResource Brush.Border2}">
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                      <TextBlock Grid.Row="0" Grid.Column="0" Classes="small bold" Text="{Binding Title}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Snippet}"/>
+                      <Button Grid.Row="0" Grid.Column="1" Classes="icon_button" Width="16" Click="OnRemoveComment" ToolTip.Tip="Remove">
+                        <Path Width="10" Height="10" Data="{StaticResource Icons.Close}"/>
+                      </Button>
+                      <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Margin="0,2,0,0" Text="{Binding Text}" TextWrapping="Wrap"/>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+
+          <TextBox Grid.Row="3" Margin="0,2,0,6" Height="56" CornerRadius="3"
+                   AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
+                   Watermark="Overall note (optional)"
+                   Text="{Binding ReviewSummary, Mode=TwoWay}"/>
+
+          <StackPanel Grid.Row="4">
+            <Button Classes="flat primary" Height="28" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                    IsEnabled="{Binding Comments.Count}"
+                    HotKey="{OnPlatform Ctrl+Alt+S, macOS=⌘+Alt+S}"
+                    Click="OnSubmitReview">
+              <ToolTip.Tip>
+                <StackPanel Orientation="Horizontal">
+                  <TextBlock Text="Send all comments to the agent" VerticalAlignment="Center"/>
+                  <TextBlock Margin="8,0,0,0"
+                             Text="{OnPlatform Ctrl+Alt+S, macOS=⌘+Alt+S}"
+                             FontSize="11"
+                             Foreground="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForeground}"
+                             VerticalAlignment="Center"/>
+                </StackPanel>
+              </ToolTip.Tip>
+              <TextBlock>
+                <Run Text="Submit review ("/><Run Text="{Binding Comments.Count}"/><Run Text=")"/>
+                <Run Text=" "/>
+                <Run FontWeight="Normal" FontSize="11" Text="{OnPlatform Ctrl+Alt+S, macOS=⌘+Alt+S}"/>
+              </TextBlock>
+            </Button>
+            <TextBlock Classes="small" Margin="0,6,0,0" TextWrapping="Wrap" Foreground="{DynamicResource Brush.FG2}"
+                       Text="{Binding ReviewStatus}" IsVisible="{Binding ReviewStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+          </StackPanel>
+        </Grid>
+      </Border>
+    </Grid>
+  </Border>
+</UserControl>

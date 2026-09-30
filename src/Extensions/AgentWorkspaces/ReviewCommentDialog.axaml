@@ -1,0 +1,49 @@
+<v:ChromelessWindow xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:v="using:SourceGit.Views"
+                    x:Class="SourceGit.Extensions.AgentWorkspaces.ReviewCommentDialog"
+                    x:Name="ThisControl"
+                    Icon="/App.ico"
+                    Title="Add review comment"
+                    Width="640"
+                    SizeToContent="Height"
+                    CanResize="False"
+                    ShowInTaskbar="False"
+                    WindowStartupLocation="CenterOwner">
+  <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+    <!-- TitleBar -->
+    <Grid Grid.Row="0" Height="28" IsVisible="{Binding !#ThisControl.UseSystemWindowFrame}">
+      <Border Background="{DynamicResource Brush.TitleBar}"
+              BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border0}"
+              PointerPressed="BeginMoveWindow"/>
+      <TextBlock Classes="bold"
+                 Text="Add review comment"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                 IsHitTestVisible="False"/>
+      <v:CaptionButtons HorizontalAlignment="Right"
+                        IsCloseButtonOnly="True"
+                        IsVisible="{OnPlatform True, macOS=False}"/>
+    </Grid>
+
+    <TextBlock Grid.Row="1" x:Name="TxtLocation" Classes="bold" Margin="16,12,16,6" TextTrimming="CharacterEllipsis"/>
+
+    <Border Grid.Row="2" Margin="16,0" MaxHeight="220"
+            Background="{DynamicResource Brush.Contents}"
+            BorderThickness="1" BorderBrush="{DynamicResource Brush.Border2}" CornerRadius="3">
+      <ScrollViewer HorizontalScrollBarVisibility="Auto">
+        <SelectableTextBlock x:Name="TxtSnippet" Margin="8,6" FontFamily="{DynamicResource Fonts.Monospace}"/>
+      </ScrollViewer>
+    </Border>
+
+    <TextBox Grid.Row="3" x:Name="TxtComment"
+             Margin="16,10,16,0" Height="110" CornerRadius="3"
+             AcceptsReturn="True" TextWrapping="Wrap"
+             VerticalContentAlignment="Top"
+             Watermark="What should the agent change here? (Enter to add, Shift+Enter for a new line)"/>
+
+    <StackPanel Grid.Row="4" Margin="0,16" Orientation="Horizontal" HorizontalAlignment="Center">
+      <Button Classes="flat primary" Width="80" Height="30" Margin="4,0" Content="{DynamicResource Text.Sure}" Click="OnAdd" ToolTip.Tip="Enter" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+      <Button Classes="flat" Width="80" Height="30" Margin="4,0" Content="{DynamicResource Text.Cancel}" Click="OnCancel" ToolTip.Tip="Esc" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+    </StackPanel>
+  </Grid>
+</v:ChromelessWindow>

@@ -1,0 +1,253 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Collections;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace SourceGit.Extensions.AgentWorkspaces
+{
+    public record AgentWorkspaceItem(ViewModels.Workspace Workspace, string RepoNames);
+
+    public class AgentMode : ObservableObject
+    {
+        public static AgentMode Instance => s_instance ??= new AgentMode();
+
+        public bool IsActive
+        {
+            get => _isActive;
+            private set => SetProperty(ref _isActive, value);
+        }
+
+        public bool IsExpanded
+        {
+            get => _isExpanded;
+            set
+            {
+                if (SetProperty(ref _isExpanded, value))
+                {
+                    if (value)
+                        File.Delete(CollapsedFlagFile);
+                    else
+                        File.WriteAllText(CollapsedFlagFile, string.Empty);
+                }
+            }
+        }
+
+        public List<AgentWorkspaceItem> Items
+        {
+            get => _items;
+            private set
+            {
+                if (SetProperty(ref _items, value))
+                    OnPropertyChanged(nameof(CanToggle));
+            }
+        }
+
+        public bool CanToggle => _isActive || _items.Count > 0;
+
+        public AvaloniaList<ReviewComment> Comments
+        {
+            get => _comments;
+            private set => SetProperty(ref _comments, value);
+        }
+
+        public string ReviewSummary
+        {
+            get => _reviewSummary;
+            set => SetProperty(ref _reviewSummary, value);
+        }
+
+        public string ReviewStatus
+        {
+            get => _reviewStatus;
+            private set => SetProperty(ref _reviewStatus, value);
+        }
+
+        private AgentMode()
+        {
+            AgentRegistry.Start();
+            AgentRegistry.Changed += Refresh;
+
+            _isExpanded = !File.Exists(CollapsedFlagFile);
+            _launcher = App.GetLauncher();
+            _launcher.PropertyChanged += OnLauncherPropertyChanged;
+            Refresh();
+        }
+
+        public void Toggle()
+        {
+            if (_isActive)
+                Activate(_lastNormal ?? ViewModels.Preferences.Instance.GetActiveWorkspace());
+            else
+                Activate(AgentRegistry.IsAgentWorkspace(_lastAgent) ? _lastAgent : AgentRegistry.Workspaces.FirstOrDefault());
+        }
+
+        public void Activate(ViewModels.Workspace to)
+        {
+            if (to == null || to == _launcher.ActiveWorkspace)
+                return;
+
+            var normal = _isActive ? _lastNormal : _launcher.ActiveWorkspace;
+            foreach (var w in AgentRegistry.Workspaces)
+                w.IsActive = false;
+            if (normal != null)
+                normal.IsActive = false;
+
+            _launcher.SwitchWorkspace(to);
+
+            if (!AgentRegistry.IsAgentWorkspace(to))
+                return;
+
+            // Keep the normal workspace marked active so it is the one restored on next startup.
+            _lastAgent = to;
+            _lastNormal = normal;
+            if (normal != null)
+            {
+                normal.IsActive = true;
+                ViewModels.Preferences.Instance.Save();
+            }
+
+            foreach (var page in _launcher.Pages)
+            {
+                if (page.Data is ViewModels.Repository repo)
+                    ShowFirstLocalChange(repo);
+            }
+        }
+
+        public void AddComment(ReviewComment comment)
+        {
+            _comments.Add(comment);
+            ReviewStatus = null;
+        }
+
+        public void RemoveComment(ReviewComment comment)
+        {
+            _comments.Remove(comment);
+        }
+
+        public async Task SubmitReviewAsync()
+        {
+            var workspace = _launcher.ActiveWorkspace;
+            var socket = AgentRegistry.GetSocket(workspace);
+            if (_comments.Count == 0)
+                return;
+
+            if (string.IsNullOrEmpty(socket))
+            {
+                ReviewStatus = "No Claude session registered for this workspace (run sgws show from the session).";
+                return;
+            }
+
+            try
+            {
+                await Review.SendAsync(socket, Review.Format(workspace.Name, [.. _comments], _reviewSummary));
+                ReviewStatus = $"Sent {_comments.Count} comment(s) to the agent.";
+                _comments.Clear();
+                ReviewSummary = string.Empty;
+            }
+            catch (Exception e)
+            {
+                ReviewStatus = $"Could not reach the Claude session (closed?): {e.Message}";
+            }
+        }
+
+        public void Refresh()
+        {
+            var active = _launcher.ActiveWorkspace;
+            Items = AgentRegistry.Workspaces
+                .Select(w => new AgentWorkspaceItem(w, string.Join(" · ", w.Repositories.Select(Path.GetFileName))))
+                .ToList();
+
+            var isRemovedAgentWorkspace = active != null && !AgentRegistry.IsAgentWorkspace(active) && !ViewModels.Preferences.Instance.Workspaces.Contains(active);
+            if (isRemovedAgentWorkspace)
+                Activate(AgentRegistry.Workspaces.FirstOrDefault() ?? _lastNormal);
+            else
+                IsActive = AgentRegistry.IsAgentWorkspace(active);
+
+            var review = AgentRegistry.IsAgentWorkspace(_launcher.ActiveWorkspace) ? _launcher.ActiveWorkspace : null;
+            if (review != _reviewWorkspace)
+            {
+                if (_reviewWorkspace != null)
+                    _drafts[_reviewWorkspace] = (_comments, _reviewSummary);
+
+                _reviewWorkspace = review;
+                var (comments, summary) = review != null && _drafts.TryGetValue(review, out var draft) ? draft : ([], string.Empty);
+                Comments = comments;
+                ReviewSummary = summary;
+                ReviewStatus = null;
+            }
+
+            if (AgentRegistry.TakeFocusRequest() is { } focus)
+            {
+                Activate(focus);
+                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: Views.Launcher window })
+                    window.BringToTop();
+            }
+        }
+
+        private void OnLauncherPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName is nameof(ViewModels.Launcher.ActiveWorkspace) or nameof(ViewModels.Launcher.ActivePage))
+                Refresh();
+        }
+
+        private static void ShowFirstLocalChange(ViewModels.Repository repo)
+        {
+            repo.SelectedViewIndex = 1;
+
+            var workingCopy = repo.WorkingCopy;
+            if (SelectFirstChange(workingCopy))
+                return;
+
+            PropertyChangedEventHandler handler = null;
+            handler = (_, e) =>
+            {
+                if (e.PropertyName is not (nameof(ViewModels.WorkingCopy.Unstaged) or nameof(ViewModels.WorkingCopy.Staged)))
+                    return;
+
+                workingCopy.PropertyChanged -= handler;
+                Dispatcher.UIThread.Post(() => SelectFirstChange(workingCopy));
+            };
+            workingCopy.PropertyChanged += handler;
+        }
+
+        private static bool SelectFirstChange(ViewModels.WorkingCopy workingCopy)
+        {
+            if (workingCopy.VisibleUnstaged is { Count: > 0 } unstaged)
+                workingCopy.SelectedUnstaged = new(new List<Models.Change> { FirstByPath(unstaged) });
+            else if (workingCopy.VisibleStaged is { Count: > 0 } staged)
+                workingCopy.SelectedStaged = new(new List<Models.Change> { FirstByPath(staged) });
+            else
+                return false;
+
+            return true;
+        }
+
+        private static Models.Change FirstByPath(List<Models.Change> changes)
+        {
+            return changes.Aggregate((l, r) => Models.NumericSort.Compare(l.Path, r.Path) <= 0 ? l : r);
+        }
+
+        private static string CollapsedFlagFile => Path.Combine(AgentRegistry.Dir, ".sidebar-collapsed");
+
+        private static AgentMode s_instance;
+
+        private readonly ViewModels.Launcher _launcher;
+        private bool _isActive;
+        private bool _isExpanded;
+        private List<AgentWorkspaceItem> _items = [];
+        private ViewModels.Workspace _lastNormal;
+        private ViewModels.Workspace _lastAgent;
+        private ViewModels.Workspace _reviewWorkspace;
+        private AvaloniaList<ReviewComment> _comments = [];
+        private string _reviewSummary = string.Empty;
+        private string _reviewStatus;
+        private readonly Dictionary<ViewModels.Workspace, (AvaloniaList<ReviewComment>, string)> _drafts = [];
+    }
+}

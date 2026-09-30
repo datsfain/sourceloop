@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ext="using:SourceGit.Extensions.AgentWorkspaces"
+             x:Class="SourceGit.Extensions.AgentWorkspaces.AgentModeToggle"
+             x:DataType="ext:AgentMode">
+  <UserControl.Styles>
+    <Style Selector="Button.agent_mode.on /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
+      <Setter Property="Opacity" Value="1"/>
+    </Style>
+    <Style Selector="Button.agent_mode.on Path">
+      <Setter Property="Fill" Value="White"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Button Classes="icon_button agent_mode"
+          Classes.on="{Binding IsActive}"
+          Width="26" Height="22" CornerRadius="4"
+          IsEnabled="{Binding CanToggle}"
+          Click="OnToggle"
+          HotKey="{OnPlatform Ctrl+Alt+A, macOS=⌘+Alt+A}"
+          ToolTip.Tip="Agent mode (Ctrl+Alt+A)">
+    <Path Width="14" Height="14" Data="{StaticResource Icons.AIAssist}"/>
+  </Button>
+</UserControl>
