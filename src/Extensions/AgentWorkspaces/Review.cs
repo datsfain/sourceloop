@@ -90,7 +90,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 }
             }
 
-            return builder.ToString().TrimEnd('\n');
+            return builder.ToString().TrimEnd('\n') + "\n\n---\n[End of SourceGit review]";
         }
 
         public static async Task SendAsync(string socketPath, string text)
