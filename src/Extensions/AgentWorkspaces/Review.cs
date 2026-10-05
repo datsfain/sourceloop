@@ -57,6 +57,13 @@ namespace SourceGit.Extensions.AgentWorkspaces
             return new ReviewComment(repo, file, location, snippet, string.Empty, false);
         }
 
+        public static ReviewComment CreateCommitDraft(string repo, List<Models.Commit> commits)
+        {
+            var location = commits.Count == 1 ? $"commit {Short(commits[0].SHA)}" : $"{commits.Count} commits";
+            var snippet = string.Join('\n', commits.Select(c => $"{Short(c.SHA)} - {c.Subject}"));
+            return new ReviewComment(repo, string.Empty, location, snippet, string.Empty, false);
+        }
+
         public static string Format(IReadOnlyList<ReviewComment> comments, string summary)
         {
             var builder = new StringBuilder("[SourceGit review]\n");

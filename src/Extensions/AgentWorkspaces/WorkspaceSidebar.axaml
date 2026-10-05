@@ -73,7 +73,7 @@
           <TextBlock Grid.Row="0" Classes="group_header_label" VerticalAlignment="Center" Text="REVIEW"/>
 
           <TextBlock Grid.Row="1" Classes="small" Margin="0,0,0,6" TextWrapping="Wrap" Foreground="{DynamicResource Brush.FG2}"
-                     Text="Hover a change, select lines or select files, then press C to comment."
+                     Text="Hover a change or select lines, files or commits, then press C to comment."
                      IsVisible="{Binding !Comments.Count}"/>
 
           <ScrollViewer Grid.Row="2" MaxHeight="320">

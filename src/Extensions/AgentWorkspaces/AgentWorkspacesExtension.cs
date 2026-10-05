@@ -66,6 +66,13 @@ namespace SourceGit.Extensions.AgentWorkspaces
             {
                 e.Handled = true;
                 await CommentOnFilesAsync((Control)focused, workingCopy);
+                return;
+            }
+
+            if (focused?.FindAncestorOfType<HistoriesCommitList>(true)?.DataContext is ViewModels.Histories { SelectedCommits: { Count: > 0 } commits })
+            {
+                e.Handled = true;
+                await CommentOnCommitsAsync((Control)focused, commits);
             }
         }
 
@@ -140,6 +147,12 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 return;
 
             await ShowDialogAsync(anchor, Review.CreateFileDraft(repo.FullPath, selected.Changes));
+        }
+
+        private static async Task CommentOnCommitsAsync(Control anchor, List<Models.Commit> commits)
+        {
+            if (anchor.FindAncestorOfType<Views.Repository>()?.DataContext is ViewModels.Repository repo)
+                await ShowDialogAsync(anchor, Review.CreateCommitDraft(repo.FullPath, commits));
         }
 
         private static async Task AddCommentAsync(Control anchor, List<Models.TextDiffLine> lines)
