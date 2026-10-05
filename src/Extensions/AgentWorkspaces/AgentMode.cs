@@ -182,7 +182,10 @@ namespace SourceGit.Extensions.AgentWorkspaces
             foreach (var page in _launcher.Pages)
             {
                 if (page.Data is ViewModels.Repository repo)
+                {
+                    repo.Histories.GraphHighlighting = Models.CommitGraphHighlighting.CurrentBranchOnly;
                     ShowFirstLocalChange(repo);
+                }
             }
         }
 
