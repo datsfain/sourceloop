@@ -34,6 +34,24 @@ namespace SourceGit.Extensions.AgentWorkspaces
             return Workspaces.Contains(workspace);
         }
 
+        public static void Remove(ViewModels.Workspace workspace)
+        {
+            foreach (var file in Directory.GetFiles(Dir, "*.json"))
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(File.ReadAllText(file));
+                    var name = doc.RootElement.TryGetProperty("name", out var n) ? n.GetString() : Path.GetFileNameWithoutExtension(file);
+                    if (name == workspace.Name)
+                        File.Delete(file);
+                }
+                catch
+                {
+                    // Ignore partially written or malformed files.
+                }
+            }
+        }
+
         public static void Start()
         {
             if (s_watcher != null)

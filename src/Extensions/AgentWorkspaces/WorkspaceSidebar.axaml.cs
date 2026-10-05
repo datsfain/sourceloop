@@ -94,6 +94,19 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 AgentMode.Instance.StopSearch();
         }
 
+        private void OnRemoveWorkspace(object sender, RoutedEventArgs e)
+        {
+            if (sender is Control { DataContext: AgentWorkspaceItem item })
+                AgentMode.Instance.RemoveWorkspace(item.Workspace);
+
+            e.Handled = true;
+        }
+
+        private void OnSwallowTapped(object sender, TappedEventArgs e)
+        {
+            e.Handled = true;
+        }
+
         private void OnItemTapped(object sender, TappedEventArgs e)
         {
             if (sender is Control { DataContext: AgentWorkspaceItem item })

@@ -206,6 +206,12 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 Activate(match.Workspace);
         }
 
+        public void RemoveWorkspace(ViewModels.Workspace workspace)
+        {
+            AgentRegistry.Remove(workspace);
+            _drafts.Remove(workspace);
+        }
+
         public void AddComment(ReviewComment comment)
         {
             _comments.Add(comment);

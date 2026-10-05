@@ -24,6 +24,12 @@
     <Style Selector="Grid.ws_item.active TextBlock.ws_name">
       <Setter Property="FontWeight" Value="Bold"/>
     </Style>
+    <Style Selector="Grid.ws_item Button.ws_remove">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="Grid.ws_item:pointerover Button.ws_remove">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
     <Style Selector="Grid.ws_item.dimmed">
       <Setter Property="Opacity" Value=".4"/>
     </Style>
@@ -68,12 +74,15 @@
                 <Border x:Name="PART_Background" Background="Transparent" Opacity="0"/>
                 <Border Margin="2,1" CornerRadius="3" BorderThickness="1" BorderBrush="{DynamicResource Brush.Accent}" IsVisible="{Binding IsMatch}"/>
 
-                <Grid Margin="0,4" ColumnDefinitions="Auto,*" IsVisible="{Binding $parent[ItemsControl].((ext:AgentMode)DataContext).IsExpanded}">
+                <Grid Margin="0,4" ColumnDefinitions="Auto,*,Auto" IsVisible="{Binding $parent[ItemsControl].((ext:AgentMode)DataContext).IsExpanded}">
                   <Border Grid.Column="0" Width="3" Margin="6,0,8,0" CornerRadius="2" Background="{Binding Workspace.Brush}"/>
                   <StackPanel Grid.Column="1" Margin="0,0,8,0">
                     <TextBlock Classes="ws_name" Text="{Binding Workspace.Name}" TextTrimming="CharacterEllipsis"/>
                     <TextBlock Classes="small" Text="{Binding RepoNames}" Foreground="{DynamicResource Brush.FG2}" TextTrimming="CharacterEllipsis"/>
                   </StackPanel>
+                  <Button Grid.Column="2" Classes="icon_button ws_remove" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center" Click="OnRemoveWorkspace" Tapped="OnSwallowTapped" ToolTip.Tip="Remove workspace and disconnect it from its session">
+                    <Path Width="10" Height="10" Data="{StaticResource Icons.Close}"/>
+                  </Button>
                 </Grid>
 
                 <Path Width="14" Height="14" Margin="9,7"
