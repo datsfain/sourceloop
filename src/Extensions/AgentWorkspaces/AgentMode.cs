@@ -13,7 +13,33 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace SourceGit.Extensions.AgentWorkspaces
 {
-    public record AgentWorkspaceItem(ViewModels.Workspace Workspace, string RepoNames);
+    public class AgentWorkspaceItem(ViewModels.Workspace workspace, string repoNames) : ObservableObject
+    {
+        public ViewModels.Workspace Workspace { get; } = workspace;
+        public string RepoNames { get; } = repoNames;
+
+        public bool IsMatch
+        {
+            get => _isMatch;
+            private set => SetProperty(ref _isMatch, value);
+        }
+
+        public bool IsDimmed
+        {
+            get => _isDimmed;
+            private set => SetProperty(ref _isDimmed, value);
+        }
+
+        public void ApplySearch(string query)
+        {
+            IsMatch = !string.IsNullOrEmpty(query) &&
+                (Workspace.Name.Contains(query, StringComparison.OrdinalIgnoreCase) || RepoNames.Contains(query, StringComparison.OrdinalIgnoreCase));
+            IsDimmed = !string.IsNullOrEmpty(query) && !IsMatch;
+        }
+
+        private bool _isMatch;
+        private bool _isDimmed;
+    }
 
     public class AgentMode : ObservableObject
     {
@@ -59,6 +85,22 @@ namespace SourceGit.Extensions.AgentWorkspaces
         }
 
         public bool HasItems => _items.Count > 0;
+
+        public bool IsSearching
+        {
+            get => _isSearching;
+            private set => SetProperty(ref _isSearching, value);
+        }
+
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                if (SetProperty(ref _searchText, value))
+                    ApplySearch();
+            }
+        }
 
         public bool ShowEmptyHint => _isExpanded && _items.Count == 0;
 
@@ -144,6 +186,23 @@ namespace SourceGit.Extensions.AgentWorkspaces
             }
         }
 
+        public void StartSearch()
+        {
+            IsSearching = true;
+        }
+
+        public void StopSearch()
+        {
+            SearchText = string.Empty;
+            IsSearching = false;
+        }
+
+        public void ActivateFirstMatch()
+        {
+            if (_items.FirstOrDefault(i => i.IsMatch) is { } match)
+                Activate(match.Workspace);
+        }
+
         public void AddComment(ReviewComment comment)
         {
             _comments.Add(comment);
@@ -206,6 +265,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
             Items = AgentRegistry.Workspaces
                 .Select(w => new AgentWorkspaceItem(w, string.Join(" · ", w.Repositories.Select(Path.GetFileName))))
                 .ToList();
+            ApplySearch();
 
             var isRemovedAgentWorkspace = active != null && !IsAgent(active) && !ViewModels.Preferences.Instance.Workspaces.Contains(active);
             if (isRemovedAgentWorkspace)
@@ -232,6 +292,13 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: Views.Launcher window })
                     window.BringToTop();
             }
+        }
+
+        private void ApplySearch()
+        {
+            var query = _searchText?.Trim();
+            foreach (var item in _items)
+                item.ApplySearch(query);
         }
 
         private void OnLauncherPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -297,6 +364,8 @@ namespace SourceGit.Extensions.AgentWorkspaces
         private bool _isExpanded;
         private double _width = 257;
         private List<AgentWorkspaceItem> _items = [];
+        private bool _isSearching;
+        private string _searchText = string.Empty;
         private ViewModels.Workspace _lastNormal;
         private ViewModels.Workspace _lastAgent;
         private ViewModels.Workspace _reviewWorkspace;
