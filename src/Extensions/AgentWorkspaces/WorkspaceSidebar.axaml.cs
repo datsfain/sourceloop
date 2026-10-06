@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Threading;
 
 namespace SourceGit.Extensions.AgentWorkspaces
 {
@@ -63,35 +62,18 @@ namespace SourceGit.Extensions.AgentWorkspaces
             await AgentMode.Instance.SubmitReviewAsync();
         }
 
-        private void OnListTapped(object sender, TappedEventArgs e)
-        {
-            if (!AgentMode.Instance.IsExpanded)
-                return;
-
-            AgentMode.Instance.StartSearch();
-            Dispatcher.UIThread.Post(() => SearchBox.Focus());
-            e.Handled = true;
-        }
-
         private void OnSearchKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
             {
-                AgentMode.Instance.StopSearch();
+                AgentMode.Instance.SearchText = string.Empty;
                 e.Handled = true;
             }
             else if (e.Key == Key.Enter)
             {
                 AgentMode.Instance.ActivateFirstMatch();
-                AgentMode.Instance.StopSearch();
                 e.Handled = true;
             }
-        }
-
-        private void OnSearchLostFocus(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(AgentMode.Instance.SearchText))
-                AgentMode.Instance.StopSearch();
         }
 
         private void OnRemoveWorkspace(object sender, RoutedEventArgs e)

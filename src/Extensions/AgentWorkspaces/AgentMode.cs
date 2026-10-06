@@ -86,12 +86,6 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         public bool HasItems => _items.Count > 0;
 
-        public bool IsSearching
-        {
-            get => _isSearching;
-            private set => SetProperty(ref _isSearching, value);
-        }
-
         public string SearchText
         {
             get => _searchText;
@@ -155,6 +149,8 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         public void Activate(ViewModels.Workspace to)
         {
+            SearchText = string.Empty;
+
             if (to == null || to == _launcher.ActiveWorkspace)
                 return;
 
@@ -187,17 +183,6 @@ namespace SourceGit.Extensions.AgentWorkspaces
                     ShowFirstLocalChange(repo);
                 }
             }
-        }
-
-        public void StartSearch()
-        {
-            IsSearching = true;
-        }
-
-        public void StopSearch()
-        {
-            SearchText = string.Empty;
-            IsSearching = false;
         }
 
         public void ActivateFirstMatch()
@@ -373,7 +358,6 @@ namespace SourceGit.Extensions.AgentWorkspaces
         private bool _isExpanded;
         private double _width = 257;
         private List<AgentWorkspaceItem> _items = [];
-        private bool _isSearching;
         private string _searchText = string.Empty;
         private ViewModels.Workspace _lastNormal;
         private ViewModels.Workspace _lastAgent;
