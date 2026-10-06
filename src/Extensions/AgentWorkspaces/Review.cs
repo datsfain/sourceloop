@@ -49,10 +49,11 @@ namespace SourceGit.Extensions.AgentWorkspaces
             return new ReviewComment(repo, option.Path, range, snippet.ToString().TrimEnd('\n'), string.Empty);
         }
 
-        public static ReviewComment CreateFileDraft(string repo, List<Models.Change> changes)
+        public static ReviewComment CreateFileDraft(string repo, List<Models.Change> changes, string revision = null)
         {
             var file = changes.Count == 1 ? changes[0].Path : string.Empty;
-            var location = changes.Count == 1 ? string.Empty : $" ({changes.Count} files)";
+            var at = revision == null ? string.Empty : $" @ {revision}";
+            var location = changes.Count == 1 ? at : revision == null ? $" ({changes.Count} files)" : $" ({changes.Count} files{at})";
             var snippet = string.Join('\n', changes.Select(c => c.Path));
             return new ReviewComment(repo, file, location, snippet, string.Empty, false);
         }
@@ -113,6 +114,14 @@ namespace SourceGit.Extensions.AgentWorkspaces
             await socket.SendAsync(stream.ToArray(), SocketFlags.None);
             socket.Shutdown(SocketShutdown.Send);
         }
+
+        public static string CompareRevisions(object start, object end)
+        {
+            static string Point(object p) => p is Models.Commit c ? Short(c.SHA) : "worktree";
+            return $"{Point(start)}..{Point(end)}";
+        }
+
+        public static string CommitRevision(Models.Commit commit) => Short(commit.SHA);
 
         private static string FormatRange(List<int> numbers)
         {

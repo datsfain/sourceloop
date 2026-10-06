@@ -69,6 +69,15 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 return;
             }
 
+            if (focused?.FindAncestorOfType<ChangeCollectionView>(true) != null &&
+                GetRevisionChanges(focused) is var (selected, revision) && selected is { Count: > 0 } &&
+                focused.FindAncestorOfType<Views.Repository>()?.DataContext is ViewModels.Repository revisionRepo)
+            {
+                e.Handled = true;
+                await ShowDialogAsync((Control)focused, Review.CreateFileDraft(revisionRepo.FullPath, selected, revision));
+                return;
+            }
+
             if (focused?.FindAncestorOfType<HistoriesCommitList>(true)?.DataContext is ViewModels.Histories { SelectedCommits: { Count: > 0 } commits })
             {
                 e.Handled = true;
@@ -147,6 +156,17 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 return;
 
             await ShowDialogAsync(anchor, Review.CreateFileDraft(repo.FullPath, selected.Changes));
+        }
+
+        private static (List<Models.Change>, string) GetRevisionChanges(Visual focused)
+        {
+            if (focused.FindAncestorOfType<Views.CommitChanges>()?.DataContext is ViewModels.CommitDetail { Commit: { } commit, ChangeSelection: { } detailSelection })
+                return (detailSelection.Changes, Review.CommitRevision(commit));
+
+            if (focused.FindAncestorOfType<Views.RevisionCompare>()?.DataContext is ViewModels.RevisionCompare { ChangeSelection: { } compareSelection } compare)
+                return (compareSelection.Changes, Review.CompareRevisions(compare.StartPoint, compare.EndPoint));
+
+            return (null, null);
         }
 
         private static async Task CommentOnCommitsAsync(Control anchor, List<Models.Commit> commits)
