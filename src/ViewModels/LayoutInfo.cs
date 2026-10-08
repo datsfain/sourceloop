@@ -65,6 +65,12 @@ namespace SourceGit.ViewModels
             set => SetProperty(ref _stashesLeftWidth, value);
         }
 
+        public GridLength DiffLeftWidth
+        {
+            get => _diffLeftWidth;
+            set => SetProperty(ref _diffLeftWidth, value);
+        }
+
         public GridLength CommitDetailChangesLeftWidth
         {
             get => _commitDetailChangesLeftWidth;
@@ -79,6 +85,7 @@ namespace SourceGit.ViewModels
 
         private GridLength _workingCopyLeftWidth = new GridLength(300, GridUnitType.Pixel);
         private GridLength _stashesLeftWidth = new GridLength(300, GridUnitType.Pixel);
+        private GridLength _diffLeftWidth = new GridLength(320, GridUnitType.Pixel);
         private GridLength _commitDetailChangesLeftWidth = new GridLength(256, GridUnitType.Pixel);
         private GridLength _commitDetailFilesLeftWidth = new GridLength(256, GridUnitType.Pixel);
         private bool _isSidebarCollapsedInLocalChanges = false;

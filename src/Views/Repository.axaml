@@ -6,6 +6,7 @@
              xmlns:vm="using:SourceGit.ViewModels"
              xmlns:v="using:SourceGit.Views"
              xmlns:c="using:SourceGit.Converters"
+             xmlns:ext="using:SourceGit.Extensions.AgentWorkspaces"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SourceGit.Views.Repository"
              x:DataType="vm:Repository"
@@ -111,6 +112,23 @@
                          FontSize="10"/>
             </Border>
           </Grid>
+        </ListBoxItem>
+
+        <ListBoxItem ToolTip.Placement="Right">
+          <ListBoxItem.IsVisible>
+            <MultiBinding Converter="{x:Static BoolConverters.And}">
+              <Binding Path="!IsBare"/>
+              <Binding Source="{x:Static ext:AgentMode.Instance}" Path="IsActive"/>
+            </MultiBinding>
+          </ListBoxItem.IsVisible>
+          <ToolTip.Tip>
+            <TextBlock>
+              <Run Text="Diff" Foreground="{DynamicResource Brush.FG1}"/>
+              <Run Text=" "/>
+              <Run Text="{OnPlatform Ctrl+4, macOS=⌘+4}" FontSize="11" Foreground="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForeground}"/>
+            </TextBlock>
+          </ToolTip.Tip>
+          <Path Classes="icon" Data="{StaticResource Icons.Diff}"/>
         </ListBoxItem>
       </ListBox>
       
@@ -803,6 +821,11 @@
               <!-- Stashes Page -->
               <Border IsVisible="{Binding IsStashesVisible, Mode=OneWay}" PropertyChanged="OnRightPagePropertyChanged">
                 <v:StashesPage DataContext="{Binding StashesPage, Mode=OneWay}"/>
+              </Border>
+
+              <!-- Diff Page (agent mode) -->
+              <Border IsVisible="{Binding IsDiffVisible, Mode=OneWay}" PropertyChanged="OnRightPagePropertyChanged">
+                <ext:DiffPageView DataContext="{Binding DiffPage, Mode=OneWay}"/>
               </Border>
 
               <!-- Auto-Fetch Notification -->

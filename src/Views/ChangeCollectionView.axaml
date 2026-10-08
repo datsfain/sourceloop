@@ -73,6 +73,13 @@
 
               <TextBlock Text="{Binding DisplayName, Mode=OneWay}"
                          Margin="4,0,0,0"/>
+
+              <Path Width="12" Height="12"
+                    Margin="6,0,0,0"
+                    Data="{StaticResource Icons.Check}"
+                    Fill="{DynamicResource Brush.Diff.AddedHighlight}"
+                    IsHitTestVisible="False"
+                    IsVisible="{Binding Change.IsViewed, FallbackValue=False}"/>
             </StackPanel>
           </DataTemplate>
         </ListBox.ItemTemplate>
@@ -108,6 +115,13 @@
               <TextBlock Text="{Binding Path, Converter={x:Static c:PathConverters.PureDirectoryName}}"
                          Foreground="{DynamicResource Brush.FG2}"
                          Margin="4,0,0,0"/>
+
+              <Path Width="12" Height="12"
+                    Margin="6,0,0,0"
+                    Data="{StaticResource Icons.Check}"
+                    Fill="{DynamicResource Brush.Diff.AddedHighlight}"
+                    IsHitTestVisible="False"
+                    IsVisible="{Binding IsViewed}"/>
             </StackPanel>
           </DataTemplate>
         </ListBox.ItemTemplate>
@@ -140,6 +154,13 @@
 
               <TextBlock Margin="4,0,0,0"
                          Text="{Binding Path}"/>
+
+              <Path Width="12" Height="12"
+                    Margin="6,0,0,0"
+                    Data="{StaticResource Icons.Check}"
+                    Fill="{DynamicResource Brush.Diff.AddedHighlight}"
+                    IsHitTestVisible="False"
+                    IsVisible="{Binding IsViewed}"/>
             </StackPanel>
           </DataTemplate>
         </ListBox.ItemTemplate>

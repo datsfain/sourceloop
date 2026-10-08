@@ -286,6 +286,41 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: Views.Launcher window })
                     window.BringToTop();
             }
+
+            if (AgentRegistry.TakeDiffRequest() is { } diff)
+            {
+                _pendingDiff = diff;
+                _pendingDiffAttempts = 0;
+            }
+
+            TryShowPendingDiff();
+        }
+
+        // "sgws show --diff": open the repo's Diff tab on exactly the revisions the agent asked for.
+        // The repo's tab may not exist yet right after startup or a workspace switch, so retry for a few seconds.
+        private void TryShowPendingDiff()
+        {
+            if (_pendingDiff is not { } request)
+                return;
+
+            foreach (var page in _launcher.Pages)
+            {
+                if (page.Data is ViewModels.Repository repo && repo.FullPath.Replace('\\', '/').TrimEnd('/') == request.Repo)
+                {
+                    _pendingDiff = null;
+
+                    // Starting the request first marks the page initialised, so opening the tab keeps these revisions.
+                    _ = repo.DiffPage.ShowAsync(request.Base, request.Target, request.MergeBase);
+                    repo.SelectedViewIndex = 3;
+                    _launcher.ActivePage = page;
+                    return;
+                }
+            }
+
+            if (++_pendingDiffAttempts <= 40)
+                DispatcherTimer.RunOnce(TryShowPendingDiff, TimeSpan.FromMilliseconds(500));
+            else
+                _pendingDiff = null;
         }
 
         private void ApplySearch()
@@ -308,6 +343,10 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         private static void ShowFirstLocalChange(ViewModels.Repository repo)
         {
+            // A diff the agent just asked for wins over the default landing page.
+            if (repo.DiffPage.WasJustRequested)
+                return;
+
             repo.SelectedViewIndex = 1;
 
             var workingCopy = repo.WorkingCopy;
@@ -355,6 +394,8 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         private readonly ViewModels.Launcher _launcher;
         private bool _isActive;
+        private DiffRequest _pendingDiff;
+        private int _pendingDiffAttempts;
         private bool _isExpanded;
         private double _width = 257;
         private List<AgentWorkspaceItem> _items = [];

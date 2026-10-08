@@ -163,6 +163,9 @@ namespace SourceGit.Extensions.AgentWorkspaces
             if (focused.FindAncestorOfType<Views.CommitChanges>()?.DataContext is ViewModels.CommitDetail { Commit: { } commit, ChangeSelection: { } detailSelection })
                 return (detailSelection.Changes, Review.CommitRevision(commit));
 
+            if (focused.FindAncestorOfType<DiffPageView>()?.DataContext is DiffPage { ChangeSelection: { } diffSelection } diffPage)
+                return (diffSelection.Changes, diffPage.CommentTag);
+
             if (focused.FindAncestorOfType<Views.RevisionCompare>()?.DataContext is ViewModels.RevisionCompare { ChangeSelection: { } compareSelection } compare)
                 return (compareSelection.Changes, Review.CompareRevisions(compare.StartPoint, compare.EndPoint));
 

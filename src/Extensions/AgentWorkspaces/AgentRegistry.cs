@@ -8,7 +8,9 @@ using Avalonia.Threading;
 
 namespace SourceGit.Extensions.AgentWorkspaces
 {
-    // Loads agent-workspaces/*.json ({"name", "repos", "color"?, "socket"?, "focus"?}) as in-memory workspaces, never saved to preferences.
+    public record DiffRequest(string Repo, string Base, string Target, bool MergeBase);
+
+    // Loads agent-workspaces/*.json ({"name", "repos", "color"?, "socket"?, "focus"?, "diff"?: {"repo", "base", "target", "mergeBase"?, "seq"}}) as in-memory workspaces, never saved to preferences.
     public static class AgentRegistry
     {
         public static event Action Changed;
@@ -27,6 +29,13 @@ namespace SourceGit.Extensions.AgentWorkspaces
             var workspace = s_focusRequest;
             s_focusRequest = null;
             return workspace;
+        }
+
+        public static DiffRequest TakeDiffRequest()
+        {
+            var request = s_diffRequest;
+            s_diffRequest = null;
+            return request;
         }
 
         public static bool IsAgentWorkspace(ViewModels.Workspace workspace)
@@ -126,6 +135,11 @@ namespace SourceGit.Extensions.AgentWorkspaces
                     s_focusRequest = workspace;
                 }
                 s_lastFocus[name] = Math.Max(lastFocus, entry.Focus);
+
+                var lastDiff = s_lastDiff.GetValueOrDefault(name, isFirstSync ? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 60_000 : 0);
+                if (entry.Diff != null && entry.DiffSeq > lastDiff)
+                    s_diffRequest = entry.Diff;
+                s_lastDiff[name] = Math.Max(lastDiff, entry.DiffSeq);
             }
 
             Workspaces = workspaces;
@@ -153,12 +167,26 @@ namespace SourceGit.Extensions.AgentWorkspaces
                     var socket = root.TryGetProperty("socket", out var so) ? so.GetString() : null;
                     var focus = root.TryGetProperty("focus", out var f) && f.TryGetInt64(out var ms) ? ms : 0;
 
+                    DiffRequest diff = null;
+                    var diffSeq = 0L;
+                    if (root.TryGetProperty("diff", out var d) && d.ValueKind == JsonValueKind.Object)
+                    {
+                        var diffRepo = d.TryGetProperty("repo", out var dr) ? dr.GetString()?.Replace('\\', '/').TrimEnd('/') : null;
+                        var diffBase = d.TryGetProperty("base", out var db) ? db.GetString() : null;
+                        var diffTarget = d.TryGetProperty("target", out var dt) ? dt.GetString() : null;
+                        if (!string.IsNullOrEmpty(diffRepo) && !string.IsNullOrEmpty(diffBase) && !string.IsNullOrEmpty(diffTarget))
+                        {
+                            diff = new DiffRequest(diffRepo, diffBase, diffTarget, d.TryGetProperty("mergeBase", out var mb) && mb.ValueKind == JsonValueKind.True);
+                            diffSeq = d.TryGetProperty("seq", out var ds) && ds.TryGetInt64(out var seq) ? seq : 0;
+                        }
+                    }
+
                     uint? color = null;
                     if (root.TryGetProperty("color", out var c) && Color.TryParse(c.GetString(), out var parsed))
                         color = parsed.ToUInt32();
 
                     if (!string.IsNullOrWhiteSpace(name) && repos.Count > 0 && entries.All(e => e.Item1 != name))
-                        entries.Add((name, new Entry(repos, color, socket, focus)));
+                        entries.Add((name, new Entry(repos, color, socket, focus, diff, diffSeq)));
                 }
                 catch
                 {
@@ -176,12 +204,14 @@ namespace SourceGit.Extensions.AgentWorkspaces
             return palette[hash % palette.Length];
         }
 
-        private record Entry(List<string> Repos, uint? Color, string Socket, long Focus);
+        private record Entry(List<string> Repos, uint? Color, string Socket, long Focus, DiffRequest Diff, long DiffSeq);
 
         private static FileSystemWatcher s_watcher;
         private static DispatcherTimer s_debounce;
         private static Dictionary<ViewModels.Workspace, string> s_sockets = [];
         private static readonly Dictionary<string, long> s_lastFocus = [];
+        private static readonly Dictionary<string, long> s_lastDiff = [];
+        private static DiffRequest s_diffRequest;
         private static ViewModels.Workspace s_focusRequest;
         private static bool s_synced;
     }

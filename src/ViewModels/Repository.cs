@@ -79,6 +79,10 @@ namespace SourceGit.ViewModels
                     OnPropertyChanged(nameof(IsDashboardVisible));
                     OnPropertyChanged(nameof(IsWorkingCopyVisible));
                     OnPropertyChanged(nameof(IsStashesVisible));
+                    OnPropertyChanged(nameof(IsDiffVisible));
+
+                    if (value == 3)
+                        DiffPage.OnShown();
                 }
             }
         }
@@ -98,6 +102,11 @@ namespace SourceGit.ViewModels
             get => _stashesPage;
         }
 
+        public Extensions.AgentWorkspaces.DiffPage DiffPage
+        {
+            get => _diffPage ??= new Extensions.AgentWorkspaces.DiffPage(this);
+        }
+
         public bool IsDashboardVisible
         {
             get => SelectedViewIndex == 0;
@@ -111,6 +120,11 @@ namespace SourceGit.ViewModels
         public bool IsStashesVisible
         {
             get => SelectedViewIndex == 2;
+        }
+
+        public bool IsDiffVisible
+        {
+            get => SelectedViewIndex == 3;
         }
 
         public string Filter
@@ -476,6 +490,7 @@ namespace SourceGit.ViewModels
 
             _watcher?.Dispose();
             _autoFetchTimer.Dispose();
+            _diffPage?.Dispose();
         }
 
         public void SendNotification(string message, bool isError = false)
@@ -1925,6 +1940,7 @@ namespace SourceGit.ViewModels
         private Histories _histories = null;
         private WorkingCopy _workingCopy = null;
         private StashesPage _stashesPage = null;
+        private Extensions.AgentWorkspaces.DiffPage _diffPage = null;
         private int _selectedViewIndex = 0;
 
         private int _localBranchesCount = 0;

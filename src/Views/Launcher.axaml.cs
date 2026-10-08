@@ -267,6 +267,10 @@ namespace SourceGit.Views
                             repo.SelectedViewIndex = 2;
                             e.Handled = true;
                             return;
+                        case Key.D4 or Key.NumPad4 when Extensions.AgentWorkspaces.AgentMode.Instance.IsActive && !repo.IsBare:
+                            repo.SelectedViewIndex = 3;
+                            e.Handled = true;
+                            return;
                         case Key.P when e.KeyModifiers.HasFlag(KeyModifiers.Shift):
                             vm.CommandPalette = new ViewModels.RepositoryCommandPalette(repo);
                             e.Handled = true;

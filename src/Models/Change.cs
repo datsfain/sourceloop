@@ -39,7 +39,7 @@
         public string ParentSHA { get; set; } = "";
     }
 
-    public class Change
+    public class Change : CommunityToolkit.Mvvm.ComponentModel.ObservableObject
     {
         public ChangeState Index { get; set; } = ChangeState.None;
         public ChangeState WorkTree { get; set; } = ChangeState.None;
@@ -47,6 +47,13 @@
         public string OriginalPath { get; set; } = "";
         public ChangeDataForAmend DataForAmend { get; set; } = null;
         public ConflictReason ConflictReason { get; set; } = ConflictReason.None;
+
+        // Review progress in the Diff tab; never set elsewhere.
+        public bool IsViewed
+        {
+            get => _isViewed;
+            set => SetProperty(ref _isViewed, value);
+        }
 
         public bool IsConflicted => WorkTree == ChangeState.Conflicted;
         public string ConflictMarker => CONFLICT_MARKERS[(int)ConflictReason];
@@ -78,6 +85,8 @@
             if (!string.IsNullOrEmpty(OriginalPath) && OriginalPath[0] == '"')
                 OriginalPath = OriginalPath.Substring(1, OriginalPath.Length - 2);
         }
+
+        private bool _isViewed;
 
         private static readonly string[] TYPE_DESCS =
         [

@@ -123,6 +123,12 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         public static string CommitRevision(Models.Commit commit) => Short(commit.SHA);
 
+        // Lets comments on a diff the user picked as e.g. "HEAD..develop" keep those names next to the resolved shas.
+        public static void RegisterRangeLabel(string start, string end, string label)
+        {
+            s_rangeLabels[$"{start}..{end}"] = label;
+        }
+
         private static string FormatRange(List<int> numbers)
         {
             var min = numbers.Min();
@@ -132,6 +138,9 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         private static string FormatRevisions(List<string> revisions)
         {
+            if (s_rangeLabels.TryGetValue(string.Join("..", revisions), out var label))
+                return label;
+
             // A single commit is diffed against its parent (or the empty tree for a root commit).
             if (revisions.Count == 2 && (revisions[0] == $"{revisions[1]}^" || revisions[0] == Models.EmptyTreeHash.Guess(revisions[1])))
                 return Short(revisions[1]);
@@ -139,8 +148,10 @@ namespace SourceGit.Extensions.AgentWorkspaces
             return string.Join("..", revisions.Select(Short));
         }
 
+        private static readonly Dictionary<string, string> s_rangeLabels = [];
+
         // Shortens a leading full SHA, keeping any suffix such as "^" or ":path".
-        private static string Short(string revision)
+        internal static string Short(string revision)
         {
             var hex = revision.TakeWhile(char.IsAsciiHexDigit).Count();
             return hex >= 40 ? revision[..10] + revision[hex..] : revision;
