@@ -113,21 +113,20 @@
             </ItemsControl>
           </ScrollViewer>
 
-          <TextBox Grid.Row="3" Margin="0,2,0,6" Height="56" CornerRadius="3"
+          <TextBox Grid.Row="3" x:Name="NoteBox" Margin="0,2,0,6" Height="56" CornerRadius="3"
                    AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
-                   Watermark="Overall note (optional)"
+                   Watermark="Overall note (optional) - Enter submits, Shift+Enter adds a line"
                    Text="{Binding ReviewSummary, Mode=TwoWay}"/>
 
           <StackPanel Grid.Row="4">
             <Button Classes="flat primary" Height="28" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
                     IsEnabled="{Binding CanSubmitReview}"
-                    HotKey="{OnPlatform Ctrl+Alt+S, macOS=⌘+Alt+S}"
                     Click="OnSubmitReview">
               <ToolTip.Tip>
                 <StackPanel Orientation="Horizontal">
                   <TextBlock Text="Send the review to the agent" VerticalAlignment="Center"/>
                   <TextBlock Margin="8,0,0,0"
-                             Text="{OnPlatform Ctrl+Alt+S, macOS=⌘+Alt+S}"
+                             Text="Enter in the note"
                              FontSize="11"
                              Foreground="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForeground}"
                              VerticalAlignment="Center"/>
@@ -136,7 +135,7 @@
               <TextBlock>
                 <Run Text="Submit review ("/><Run Text="{Binding Comments.Count}"/><Run Text=")"/>
                 <Run Text=" "/>
-                <Run FontWeight="Normal" FontSize="11" Text="{OnPlatform Ctrl+Alt+S, macOS=⌘+Alt+S}"/>
+                <Run FontWeight="Normal" FontSize="11" Text="Enter"/>
               </TextBlock>
             </Button>
             <TextBlock Classes="small" Margin="0,6,0,0" TextWrapping="Wrap" Foreground="{DynamicResource Brush.FG2}"

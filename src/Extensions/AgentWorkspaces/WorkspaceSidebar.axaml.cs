@@ -10,6 +10,9 @@ namespace SourceGit.Extensions.AgentWorkspaces
         public WorkspaceSidebar()
         {
             InitializeComponent();
+
+            // The TextBox consumes Enter itself, so listen while tunnelling. Shift+Enter keeps inserting a new line.
+            NoteBox.AddHandler(KeyDownEvent, OnNoteKeyDown, RoutingStrategies.Tunnel);
         }
 
         protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -54,6 +57,15 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 AgentMode.Instance.RemoveComment(comment);
 
             e.Handled = true;
+        }
+
+        private async void OnNoteKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter || e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+                return;
+
+            e.Handled = true;
+            await AgentMode.Instance.SubmitReviewAsync();
         }
 
         private async void OnSubmitReview(object sender, RoutedEventArgs e)
