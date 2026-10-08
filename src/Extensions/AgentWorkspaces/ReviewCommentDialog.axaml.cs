@@ -16,6 +16,12 @@ namespace SourceGit.Extensions.AgentWorkspaces
         {
             TxtLocation.Text = draft.Label;
             TxtSnippet.Text = draft.Snippet;
+
+            if (!string.IsNullOrEmpty(draft.Selection))
+            {
+                TxtSelection.Text = "Selected: " + draft.Selection.Replace('\n', ' ');
+                TxtSelection.IsVisible = true;
+            }
         }
 
         protected override void OnOpened(EventArgs e)

@@ -8,14 +8,15 @@ using System.Threading.Tasks;
 
 namespace SourceGit.Extensions.AgentWorkspaces
 {
-    public record ReviewComment(string Repo, string File, string Location, string Snippet, string Text, bool IsDiff = true)
+    // Selection is the exact text the user highlighted when it covers less than the whole lines.
+    public record ReviewComment(string Repo, string File, string Location, string Snippet, string Text, bool IsDiff = true, string Selection = null)
     {
         public string Label => string.IsNullOrEmpty(File) ? Location.Trim(' ', '(', ')') : File + Location;
     }
 
     public static class Review
     {
-        public static ReviewComment CreateDraft(string repo, Models.DiffOption option, List<Models.TextDiffLine> selected)
+        public static ReviewComment CreateDraft(string repo, Models.DiffOption option, List<Models.TextDiffLine> selected, string selectedText = null)
         {
             var newLines = selected.Where(l => l.NewLineNumber > 0).Select(l => l.NewLineNumber).ToList();
             var oldLines = selected.Where(l => l.OldLineNumber > 0).Select(l => l.OldLineNumber).ToList();
@@ -46,7 +47,18 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 snippet.Append(prefix).Append(line.Content).Append('\n');
             }
 
-            return new ReviewComment(repo, option.Path, range, snippet.ToString().TrimEnd('\n'), string.Empty);
+            return new ReviewComment(repo, option.Path, range, snippet.ToString().TrimEnd('\n'), string.Empty, true, PartialSelection(selected, selectedText));
+        }
+
+        // The highlighted text, unless it is just the whole lines (which the snippet already shows).
+        private static string PartialSelection(List<Models.TextDiffLine> lines, string selectedText)
+        {
+            var text = selectedText?.Replace("\r\n", "\n").TrimEnd('\n');
+            if (string.IsNullOrWhiteSpace(text))
+                return null;
+
+            var whole = string.Join('\n', lines.Select(l => l.Content));
+            return text.Trim() == whole.Trim() ? null : text;
         }
 
         public static ReviewComment CreateFileDraft(string repo, List<Models.Change> changes, string revision = null)
@@ -87,6 +99,13 @@ namespace SourceGit.Extensions.AgentWorkspaces
                     builder.Append(++number).Append(". ").Append(c.Label).Append('\n');
                     if (c.IsDiff || string.IsNullOrEmpty(c.File))
                         builder.Append(c.IsDiff ? "```diff\n" : "```\n").Append(c.Snippet).Append("\n```\n");
+                    if (!string.IsNullOrEmpty(c.Selection))
+                    {
+                        if (c.Selection.Contains('\n') || c.Selection.Contains('`'))
+                            builder.Append("Selected text:\n~~~\n").Append(c.Selection).Append("\n~~~\n");
+                        else
+                            builder.Append("Selected text: `").Append(c.Selection).Append("`\n");
+                    }
                     builder.Append(c.Text.Trim()).Append('\n');
                 }
             }

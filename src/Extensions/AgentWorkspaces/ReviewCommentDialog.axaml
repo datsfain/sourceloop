@@ -25,7 +25,10 @@
                         IsVisible="{OnPlatform True, macOS=False}"/>
     </Grid>
 
-    <TextBlock Grid.Row="1" x:Name="TxtLocation" Classes="bold" Margin="16,12,16,6" TextTrimming="CharacterEllipsis"/>
+    <StackPanel Grid.Row="1" Margin="16,12,16,6" Spacing="2">
+      <TextBlock x:Name="TxtLocation" Classes="bold" TextTrimming="CharacterEllipsis"/>
+      <TextBlock x:Name="TxtSelection" Foreground="{DynamicResource Brush.FG2}" FontFamily="{DynamicResource Fonts.Monospace}" TextTrimming="CharacterEllipsis" IsVisible="False"/>
+    </StackPanel>
 
     <Border Grid.Row="2" Margin="16,0" MaxHeight="220"
             Background="{DynamicResource Brush.Contents}"

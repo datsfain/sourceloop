@@ -144,7 +144,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
             var start = Math.Min(selection.StartPosition.Line, selection.EndPosition.Line);
             var end = Math.Min(Math.Max(selection.StartPosition.Line, selection.EndPosition.Line), lines.Count);
             if (start >= 1 && start <= end)
-                await AddCommentAsync(editor, lines.GetRange(start - 1, end - start + 1));
+                await AddCommentAsync(editor, lines.GetRange(start - 1, end - start + 1), selection.GetText());
         }
 
         private static async Task CommentOnFilesAsync(Control anchor, ViewModels.WorkingCopy workingCopy)
@@ -178,13 +178,13 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 await ShowDialogAsync(anchor, Review.CreateCommitDraft(repo.FullPath, commits));
         }
 
-        private static async Task AddCommentAsync(Control anchor, List<Models.TextDiffLine> lines)
+        private static async Task AddCommentAsync(Control anchor, List<Models.TextDiffLine> lines, string selectedText = null)
         {
             if (anchor.DataContext is not ViewModels.TextDiffContext { Option: { } option } ||
                 anchor.FindAncestorOfType<Views.Repository>()?.DataContext is not ViewModels.Repository repo)
                 return;
 
-            await ShowDialogAsync(anchor, Review.CreateDraft(repo.FullPath, option, lines));
+            await ShowDialogAsync(anchor, Review.CreateDraft(repo.FullPath, option, lines, selectedText));
         }
 
         private static async Task ShowDialogAsync(Control anchor, ReviewComment draft)
