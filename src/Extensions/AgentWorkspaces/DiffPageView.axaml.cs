@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -13,9 +14,24 @@ namespace SourceGit.Extensions.AgentWorkspaces
         {
             InitializeComponent();
 
-            // Handled while tunnelling so the diff editors cannot swallow the file navigation keys.
-            AddHandler(KeyDownEvent, OnNavigationKeyDown, RoutingStrategies.Tunnel);
             DataContextChanged += (_, _) => Hook();
+        }
+
+        // The keys are listened for on the whole window: a file without a diff to show (e.g. a pure rename) throws away the
+        // focused control, and with nothing focused key events never reach this page. Tunnelling also keeps the diff editors
+        // from swallowing them.
+        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+        {
+            base.OnAttachedToVisualTree(e);
+            _topLevel = TopLevel.GetTopLevel(this);
+            _topLevel?.AddHandler(KeyDownEvent, OnNavigationKeyDown, RoutingStrategies.Tunnel);
+        }
+
+        protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+        {
+            _topLevel?.RemoveHandler(KeyDownEvent, OnNavigationKeyDown);
+            _topLevel = null;
+            base.OnDetachedFromVisualTree(e);
         }
 
         private void Hook()
@@ -54,13 +70,14 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         private void OnNavigationKeyDown(object sender, KeyEventArgs e)
         {
-            if (DataContext is not DiffPage page)
+            // Only while this page is the one on screen.
+            if (DataContext is not DiffPage page || !this.IsEffectivelyVisible)
                 return;
 
             // V toggles "viewed" wherever focus is in this page (file list or diff), except while typing in a text box such as the filter.
             if (e.Key == Key.V && e.KeyModifiers == KeyModifiers.None)
             {
-                if (TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is not TextBox)
+                if (_topLevel?.FocusManager?.GetFocusedElement() is not TextBox)
                 {
                     page.ToggleViewed();
                     e.Handled = true;
@@ -137,6 +154,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
             flyout.ShowAt(anchor);
         }
 
+        private TopLevel _topLevel;
         private DiffPage _hooked;
     }
 }

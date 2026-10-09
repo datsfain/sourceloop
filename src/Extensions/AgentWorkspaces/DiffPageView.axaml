@@ -113,7 +113,7 @@
 
     <TextBlock Grid.Row="1"
                Margin="0,0,0,6"
-               Foreground="{DynamicResource Brush.Conflict.Foreground}"
+               Foreground="DarkOrange"
                Text="{Binding Message}"
                IsVisible="{Binding Message, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
 
@@ -125,7 +125,7 @@
         <ColumnDefinition Width="*" MinWidth="100"/>
       </Grid.ColumnDefinitions>
 
-      <Grid Grid.Column="0" RowDefinitions="26,*,26">
+      <Grid Grid.Column="0" RowDefinitions="26,*,26" IsVisible="{Binding !IsFileListCollapsed}">
         <Grid Grid.Row="0" ColumnDefinitions="*,18">
           <TextBox Grid.Column="0"
                    x:Name="SearchBox"
