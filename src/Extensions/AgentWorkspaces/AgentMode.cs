@@ -137,6 +137,17 @@ namespace SourceGit.Extensions.AgentWorkspaces
             _launcher = App.GetLauncher();
             _launcher.PropertyChanged += OnLauncherPropertyChanged;
             Refresh();
+
+            // Review drafts and where the user was are saved shortly after they change, and once more on exit.
+            _saveTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1500) };
+            _saveTimer.Tick += (_, _) =>
+            {
+                ApplyLayout(false);
+                SaveState();
+            };
+            _saveTimer.Start();
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                desktop.Exit += (_, _) => SaveState();
         }
 
         public void Toggle()
@@ -161,6 +172,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
             if (normal != null)
                 normal.IsActive = false;
 
+            SaveState();
             _launcher.SwitchWorkspace(to);
 
             if (!IsAgent(to))
@@ -175,14 +187,99 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 ViewModels.Preferences.Instance.Save();
             }
 
+            _restoredRepos.Clear();
+            _pendingActiveRepo = AgentState.Load(to.Name).ActiveRepo;
+            ApplyLayout(true);
+        }
+
+        // Puts every open repo back on the page (and Diff tab setup) it had when the workspace was last used.
+        // The first pass also covers repos without saved state; later passes only restore tabs that open late.
+        private void ApplyLayout(bool initial)
+        {
+            var workspace = _launcher.ActiveWorkspace;
+            if (!AgentRegistry.IsAgentWorkspace(workspace))
+                return;
+
+            var state = AgentState.Load(workspace.Name);
             foreach (var page in _launcher.Pages)
             {
-                if (page.Data is ViewModels.Repository repo)
+                if (page.Data is not ViewModels.Repository repo)
+                    continue;
+
+                var path = AgentState.NormalizeRepo(repo.FullPath);
+                var saved = state.Repos.GetValueOrDefault(path);
+                if ((!initial && saved == null) || !_restoredRepos.Add(path))
+                    continue;
+
+                repo.Histories.GraphHighlighting = Models.CommitGraphHighlighting.CurrentBranchOnly;
+
+                if (saved?.Diff != null)
+                    repo.DiffPage.Restore(saved.Diff);
+
+                // A diff the agent just asked for wins over the saved page.
+                if (repo.DiffPage.WasJustRequested)
+                    continue;
+
+                if (saved?.Page is >= 0 and <= 3 and var index && (index != 3 || !repo.IsBare))
                 {
-                    repo.Histories.GraphHighlighting = Models.CommitGraphHighlighting.CurrentBranchOnly;
+                    if (index == 1)
+                        ShowFirstLocalChange(repo);
+                    else
+                        repo.SelectedViewIndex = index;
+                }
+                else
+                {
                     ShowFirstLocalChange(repo);
                 }
             }
+
+            if (_pendingActiveRepo != null)
+            {
+                var target = _launcher.Pages.FirstOrDefault(p => p.Data is ViewModels.Repository r && AgentState.NormalizeRepo(r.FullPath) == _pendingActiveRepo);
+                if (target != null)
+                {
+                    _pendingActiveRepo = null;
+                    _launcher.ActivePage = target;
+                }
+            }
+        }
+
+        // Snapshots the review draft and the layout of the open repos; writes only when something changed.
+        private void SaveState()
+        {
+            if (_reviewWorkspace == null || _state == null || _launcher.ActiveWorkspace != _reviewWorkspace)
+                return;
+
+            _state.Summary = _reviewSummary;
+            _state.Comments = [.. _comments];
+
+            foreach (var page in _launcher.Pages)
+            {
+                if (page.Data is not ViewModels.Repository repo)
+                    continue;
+
+                // Repos whose saved layout is not applied yet keep it; capturing now would overwrite it with defaults.
+                var path = AgentState.NormalizeRepo(repo.FullPath);
+                var hasSaved = _state.Repos.TryGetValue(path, out var saved);
+                if (hasSaved && !_restoredRepos.Contains(path))
+                    continue;
+
+                if (saved == null)
+                {
+                    // A tab opened by hand: nothing to restore, so from now on it is tracked like the others.
+                    saved = _state.Repos[path] = new RepoState();
+                    _restoredRepos.Add(path);
+                }
+
+                saved.Page = repo.SelectedViewIndex;
+                if (repo.DiffPage.Capture() is { } diff)
+                    saved.Diff = diff;
+            }
+
+            if (_pendingActiveRepo == null && _launcher.ActivePage?.Data is ViewModels.Repository active)
+                _state.ActiveRepo = AgentState.NormalizeRepo(active.FullPath);
+
+            AgentState.Save(_state);
         }
 
         public void ActivateFirstMatch()
@@ -195,6 +292,15 @@ namespace SourceGit.Extensions.AgentWorkspaces
         {
             AgentRegistry.Remove(workspace);
             _drafts.Remove(workspace);
+
+            // Removing a workspace by hand discards what was remembered about it (a session ending keeps it for a while).
+            if (_reviewWorkspace == workspace)
+            {
+                _reviewWorkspace = null;
+                _state = null;
+            }
+
+            AgentState.Delete(workspace.Name);
         }
 
         public void AddComment(ReviewComment comment)
@@ -260,6 +366,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 .Select(w => new AgentWorkspaceItem(w, string.Join(" · ", w.Repositories.Select(Path.GetFileName))))
                 .ToList();
             ApplySearch();
+            AgentState.Prune([.. AgentRegistry.Workspaces.Select(w => w.Name)]);
 
             var isRemovedAgentWorkspace = active != null && !IsAgent(active) && !ViewModels.Preferences.Instance.Workspaces.Contains(active);
             if (isRemovedAgentWorkspace)
@@ -274,7 +381,10 @@ namespace SourceGit.Extensions.AgentWorkspaces
                     _drafts[_reviewWorkspace] = (_comments, _reviewSummary);
 
                 _reviewWorkspace = review;
-                var (comments, summary) = review != null && _drafts.TryGetValue(review, out var draft) ? draft : ([], string.Empty);
+                _state = review != null ? AgentState.Load(review.Name) : null;
+                var (comments, summary) = review != null && _drafts.TryGetValue(review, out var draft)
+                    ? draft
+                    : (new AvaloniaList<ReviewComment>(_state?.Comments ?? []), _state?.Summary ?? string.Empty);
                 Comments = comments;
                 ReviewSummary = summary;
                 ReviewStatus = null;
@@ -312,6 +422,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
                     // Starting the request first marks the page initialised, so opening the tab keeps these revisions.
                     _ = repo.DiffPage.ShowAsync(request.Base, request.Target, request.MergeBase);
                     repo.SelectedViewIndex = 3;
+                    _pendingActiveRepo = null;
                     _launcher.ActivePage = page;
                     return;
                 }
@@ -394,6 +505,10 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         private readonly ViewModels.Launcher _launcher;
         private bool _isActive;
+        private DispatcherTimer _saveTimer;
+        private WorkspaceState _state;
+        private readonly HashSet<string> _restoredRepos = [];
+        private string _pendingActiveRepo;
         private DiffRequest _pendingDiff;
         private int _pendingDiffAttempts;
         private bool _isExpanded;

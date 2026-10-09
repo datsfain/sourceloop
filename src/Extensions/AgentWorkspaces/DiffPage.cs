@@ -169,12 +169,63 @@ namespace SourceGit.Extensions.AgentWorkspaces
             if (!_initialized)
             {
                 _initialized = true;
-                _ = InitializeAsync();
+                _ = _restoreState != null ? RestoreAsync(_restoreState) : InitializeAsync();
             }
             else
             {
                 _ = LoadAsync(true);
             }
+        }
+
+        // What to remember about this page, or null while it has not been set up yet (so saved state is kept as it is).
+        public DiffPageState Capture()
+        {
+            if (!_initialized || _base == null || _target == null)
+                return null;
+
+            var state = new DiffPageState
+            {
+                Base = new RevisionState(_base.Name, _base.Spec, _base.Sha),
+                Target = new RevisionState(_target.Name, _target.Spec, _target.Sha),
+                MergeBase = _useMergeBase,
+                File = _changeSelection is { Count: 1, HasFolder: false } selection ? selection.Changes[0].Path : null,
+                Filter = _searchFilter,
+                Collapsed = _isFileListCollapsed,
+            };
+
+            // Only marks keyed by blob hashes survive a restart; the newest ones win when there are very many.
+            foreach (var (key, at) in _viewed.Where(p => p.Key.StartsWith("b:", StringComparison.Ordinal)).OrderByDescending(p => p.Value).Take(MaxSavedViewed))
+                state.Viewed[key] = at;
+
+            return state;
+        }
+
+        // The saved state is applied the first time the tab is shown. When an agent already opened a specific diff,
+        // only the viewed marks are merged in, so they are not lost when the next save writes this page's state.
+        public void Restore(DiffPageState state)
+        {
+            if (!_initialized)
+            {
+                _restoreState = state;
+                return;
+            }
+
+            MergeViewed(state);
+        }
+
+        private void MergeViewed(DiffPageState state)
+        {
+            foreach (var (key, at) in state.Viewed)
+                _viewed.TryAdd(key, at);
+
+            if (_allChanges == null)
+                return;
+
+            foreach (var c in _allChanges)
+                c.IsViewed = _viewed.ContainsKey(ViewedKey(c));
+
+            ViewedCount = _allChanges.Count(c => c.IsViewed);
+            UpdateCurrentViewed();
         }
 
         // True shortly after an agent asked for a specific diff, so startup defaults do not switch away from it.
@@ -185,6 +236,15 @@ namespace SourceGit.Extensions.AgentWorkspaces
         {
             _initialized = true;
             _requestedAt = DateTime.UtcNow;
+
+            // Saved marks still apply to the files of the diff that was asked for.
+            if (_restoreState != null)
+            {
+                foreach (var (key, at) in _restoreState.Viewed)
+                    _viewed.TryAdd(key, at);
+                _restoreState = null;
+            }
+
             var b = await ResolveAsync(baseSpec);
             var t = await ResolveAsync(targetSpec);
             if (b == null || t == null)
@@ -275,7 +335,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
             {
                 c.IsViewed = mark;
                 if (mark)
-                    _viewed.Add(ViewedKey(c));
+                    _viewed[ViewedKey(c)] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 else
                     _viewed.Remove(ViewedKey(c));
             }
@@ -333,6 +393,49 @@ namespace SourceGit.Extensions.AgentWorkspaces
             Target = head;
             Base = await FindDefaultBaseAsync(head);
             await LoadAsync();
+        }
+
+        private async Task RestoreAsync(DiffPageState state)
+        {
+            IsLoading = true;
+            Message = null;
+
+            foreach (var (key, at) in state.Viewed)
+                _viewed[key] = at;
+
+            _searchFilter = state.Filter ?? string.Empty;
+            OnPropertyChanged(nameof(SearchFilter));
+            IsFileListCollapsed = state.Collapsed;
+            SetProperty(ref _useMergeBase, state.MergeBase, nameof(UseMergeBase));
+            _restoreFile = state.File;
+
+            var b = state.Base != null ? await ResolveSavedAsync(state.Base) : null;
+            var t = state.Target != null ? await ResolveSavedAsync(state.Target) : null;
+            if (b == null || t == null)
+            {
+                // A saved branch may be gone by now; fall back to the default range and say so.
+                await InitializeAsync();
+                Message = "A saved revision no longer exists; showing the default range.";
+                return;
+            }
+
+            Base = b;
+            Target = t;
+            await LoadAsync();
+        }
+
+        private async Task<DiffRevision> ResolveSavedAsync(RevisionState saved)
+        {
+            if (saved.Name == DiffRevision.Worktree.Name && saved.Sha.Length == 0)
+                return DiffRevision.Worktree;
+            if (saved.Spec != null)
+                return await ResolveAsync(saved.Spec);
+            if (saved.Name == "root")
+                return new DiffRevision(saved.Name, saved.Sha, null);
+
+            // A fixed commit, e.g. where the branch left the default branch.
+            var commit = await ResolveAsync(saved.Sha);
+            return commit == null ? null : await WithCommitAsync(new DiffRevision(saved.Name, saved.Sha, null));
         }
 
         // The point where HEAD left the default branch, so a feature branch shows exactly its own changes.
@@ -456,8 +559,17 @@ namespace SourceGit.Extensions.AgentWorkspaces
             if (version != _loadVersion)
                 return;
 
+            // Blob hashes identify a file's diff independently of the commits around it, so marks survive new commits and rebases.
+            _blobs = start != end && start.Length > 0 && end.Length > 0
+                ? await new RawDiffCommand(_repo.FullPath, start, end).ReadAsync()
+                : [];
+            if (version != _loadVersion)
+                return;
+
+            _effectiveBase = start;
+            _effectiveTarget = end;
             foreach (var c in changes)
-                c.IsViewed = _viewed.Contains($"{start}|{end}|{c.Path}");
+                c.IsViewed = _viewed.ContainsKey(ViewedKey(c));
 
             var shas = $"{Short(start)}..{Short(end)}";
             var tag = IsPlainSha(_base) && IsPlainSha(_target)
@@ -465,8 +577,6 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 : $"{_base.Name}{separator}{_target.Name} ({shas})";
             Review.RegisterRangeLabel(string.IsNullOrEmpty(start) ? "-R" : start, end, tag);
 
-            _effectiveBase = start;
-            _effectiveTarget = end;
             _commentTag = tag;
             OnPropertyChanged(nameof(CommentTag));
 
@@ -499,7 +609,9 @@ namespace SourceGit.Extensions.AgentWorkspaces
             VisibleChanges = visible;
 
             // Keep the open file when it survives (e.g. after a reload or filter change); otherwise start from the first one.
-            var openPath = selectFirst ? _changeSelection?.Changes.FirstOrDefault()?.Path : null;
+            var openPath = selectFirst ? _restoreFile ?? _changeSelection?.Changes.FirstOrDefault()?.Path : null;
+            if (selectFirst)
+                _restoreFile = null;
             var keep = openPath == null ? null : visible.FirstOrDefault(c => c.Path == openPath);
             if (keep != null)
                 ChangeSelection = new ViewModels.ChangeSelection(new List<Models.Change> { keep });
@@ -509,7 +621,12 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 ChangeSelection = new ViewModels.ChangeSelection(null);
         }
 
-        private string ViewedKey(Models.Change change) => $"{_effectiveBase}|{_effectiveTarget}|{change.Path}";
+        private string ViewedKey(Models.Change change)
+        {
+            return _blobs.TryGetValue(change.Path, out var blob)
+                ? $"b:{blob.Old}..{blob.New}|{change.Path}"
+                : $"r:{_effectiveBase}|{_effectiveTarget}|{change.Path}";
+        }
 
         private void OnAgentModeChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -536,8 +653,54 @@ namespace SourceGit.Extensions.AgentWorkspaces
             }
         }
 
+        // `git diff --raw`: the old and new blob of every changed file, by path.
+        private class RawDiffCommand : Commands.Command
+        {
+            public RawDiffCommand(string repo, string start, string end)
+            {
+                WorkingDirectory = repo;
+                Context = repo;
+                RaiseError = false;
+                Args = $"diff --raw -z --no-abbrev {start} {end}";
+            }
+
+            public async Task<Dictionary<string, (string Old, string New)>> ReadAsync()
+            {
+                var blobs = new Dictionary<string, (string, string)>();
+                var rs = await ReadToEndAsync().ConfigureAwait(false);
+                if (!rs.IsSuccess)
+                    return blobs;
+
+                // -z output: ":<mode> <mode> <old> <new> <status>" NUL path NUL, with two paths for renames and copies.
+                var tokens = rs.StdOut.Split('\0', StringSplitOptions.RemoveEmptyEntries);
+                for (var i = 0; i < tokens.Length;)
+                {
+                    var parts = tokens[i].Split(' ');
+                    if (!tokens[i].StartsWith(':') || parts.Length < 5)
+                    {
+                        i++;
+                        continue;
+                    }
+
+                    var twoPaths = parts[4][0] is 'R' or 'C';
+                    var pathIndex = twoPaths ? i + 2 : i + 1;
+                    if (pathIndex < tokens.Length)
+                        blobs[tokens[pathIndex]] = (parts[2], parts[3]);
+
+                    i = pathIndex + 1;
+                }
+
+                return blobs;
+            }
+        }
+
+        private const int MaxSavedViewed = 5000;
+
         private readonly ViewModels.Repository _repo;
-        private readonly HashSet<string> _viewed = [];
+        private readonly Dictionary<string, long> _viewed = [];
+        private Dictionary<string, (string Old, string New)> _blobs = [];
+        private DiffPageState _restoreState;
+        private string _restoreFile;
         private bool _initialized;
         private DateTime _requestedAt = DateTime.MinValue;
         private int _loadVersion;
