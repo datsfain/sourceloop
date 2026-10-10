@@ -344,6 +344,25 @@ namespace SourceGit.Extensions.AgentWorkspaces
             UpdateCurrentViewed();
         }
 
+        // Clears the viewed mark of every file in this diff (marks of other diffs are kept).
+        public void UnviewAll()
+        {
+            if (_allChanges == null)
+                return;
+
+            foreach (var c in _allChanges)
+            {
+                if (!c.IsViewed)
+                    continue;
+
+                c.IsViewed = false;
+                _viewed.Remove(ViewedKey(c));
+            }
+
+            ViewedCount = 0;
+            UpdateCurrentViewed();
+        }
+
         // A file with no changes (or only line-ending changes) still counts as viewed, but there is no diff to blur, so no overlay.
         private bool IsCurrentEmpty => _diffContext?.Content is Models.NoOrEOLChange;
 

@@ -90,13 +90,14 @@
         <Path Width="14" Height="14" Data="{StaticResource Icons.Loading}"/>
       </Button>
 
-      <TextBlock Grid.Column="6"
-                 Margin="8,0,4,0"
+      <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
+        <StackPanel.IsVisible>
+          <Binding Path="TotalChanges" Converter="{x:Static c:IntConverters.IsGreaterThanZero}"/>
+        </StackPanel.IsVisible>
+
+      <TextBlock Margin="8,0,4,0"
                  VerticalAlignment="Center"
                  Foreground="{DynamicResource Brush.FG2}">
-        <TextBlock.IsVisible>
-          <Binding Path="TotalChanges" Converter="{x:Static c:IntConverters.IsGreaterThanZero}"/>
-        </TextBlock.IsVisible>
         <ToolTip.Tip>
           <TextBlock>
             <Run Text="Mark selected files as viewed" Foreground="{DynamicResource Brush.FG1}"/>
@@ -109,6 +110,15 @@
         <Run Text="{Binding TotalChanges, Mode=OneWay}" FontWeight="Bold"/>
         <Run Text="viewed"/>
       </TextBlock>
+
+        <Button Classes="icon_button"
+                Width="28" Height="28"
+                Command="{Binding UnviewAll}"
+                IsEnabled="{Binding ViewedCount, Converter={x:Static c:IntConverters.IsGreaterThanZero}}"
+                ToolTip.Tip="Mark all files as not viewed">
+          <Path Width="14" Height="14" Data="{StaticResource Icons.EyeClose}"/>
+        </Button>
+      </StackPanel>
     </Grid>
 
     <TextBlock Grid.Row="1"
