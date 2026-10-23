@@ -14,6 +14,13 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         public ReviewCommentDialog(ReviewComment draft) : this()
         {
+            if (!string.IsNullOrEmpty(draft.Text))
+            {
+                Title = "Edit review comment";
+                TxtComment.Text = draft.Text;
+                TxtComment.CaretIndex = draft.Text.Length;
+            }
+
             TxtLocation.Text = draft.Label;
             TxtSnippet.Text = draft.Snippet;
 

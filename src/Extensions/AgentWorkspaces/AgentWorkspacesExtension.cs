@@ -187,6 +187,16 @@ namespace SourceGit.Extensions.AgentWorkspaces
             await ShowDialogAsync(anchor, Review.CreateDraft(repo.FullPath, option, lines, selectedText));
         }
 
+        public static async Task EditCommentAsync(Control anchor, ReviewComment comment)
+        {
+            if (TopLevel.GetTopLevel(anchor) is not Window owner)
+                return;
+
+            var text = await new ReviewCommentDialog(comment).ShowDialog<string>(owner);
+            if (!string.IsNullOrWhiteSpace(text))
+                AgentMode.Instance.ReplaceComment(comment, comment with { Text = text });
+        }
+
         private static async Task ShowDialogAsync(Control anchor, ReviewComment draft)
         {
             if (TopLevel.GetTopLevel(anchor) is not Window owner)

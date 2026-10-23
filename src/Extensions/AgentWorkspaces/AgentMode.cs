@@ -30,6 +30,30 @@ namespace SourceGit.Extensions.AgentWorkspaces
             private set => SetProperty(ref _isDimmed, value);
         }
 
+        public bool IsEditing
+        {
+            get => _isEditing;
+            set => SetProperty(ref _isEditing, value);
+        }
+
+        public bool IsDragged
+        {
+            get => _isDragged;
+            set => SetProperty(ref _isDragged, value);
+        }
+
+        public bool IsDropAbove
+        {
+            get => _isDropAbove;
+            set => SetProperty(ref _isDropAbove, value);
+        }
+
+        public bool IsDropBelow
+        {
+            get => _isDropBelow;
+            set => SetProperty(ref _isDropBelow, value);
+        }
+
         public void ApplySearch(string query)
         {
             IsMatch = !string.IsNullOrEmpty(query) &&
@@ -39,6 +63,10 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         private bool _isMatch;
         private bool _isDimmed;
+        private bool _isEditing;
+        private bool _isDragged;
+        private bool _isDropAbove;
+        private bool _isDropBelow;
     }
 
     public class AgentMode : ObservableObject
@@ -181,6 +209,14 @@ namespace SourceGit.Extensions.AgentWorkspaces
             // Keep the normal workspace marked active so it is the one restored on next startup.
             _lastAgent = to;
             _lastNormal = normal;
+            if (!_navigating && AgentRegistry.IsAgentWorkspace(to) && (_historyIndex < 0 || _history[_historyIndex] != to))
+            {
+                _history.RemoveRange(_historyIndex + 1, _history.Count - _historyIndex - 1);
+                _history.Add(to);
+                _historyIndex = _history.Count - 1;
+                NotifyHistory();
+            }
+
             if (normal != null)
             {
                 normal.IsActive = true;
@@ -188,7 +224,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
             }
 
             _restoredRepos.Clear();
-            _pendingActiveRepo = AgentState.Load(to.Name).ActiveRepo;
+            _pendingActiveRepo = AgentState.Load(AgentRegistry.IdOf(to)).ActiveRepo;
             ApplyLayout(true);
         }
 
@@ -200,7 +236,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
             if (!AgentRegistry.IsAgentWorkspace(workspace))
                 return;
 
-            var state = AgentState.Load(workspace.Name);
+            var state = AgentState.Load(AgentRegistry.IdOf(workspace));
             foreach (var page in _launcher.Pages)
             {
                 if (page.Data is not ViewModels.Repository repo)
@@ -288,8 +324,73 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 Activate(match.Workspace);
         }
 
+        public bool CanGoBack => FindHistory(-1) >= 0;
+
+        public bool CanGoForward => FindHistory(1) >= 0;
+
+        public void GoBack() => Go(-1);
+
+        public void GoForward() => Go(1);
+
+        // Switches back/forward through the workspaces viewed so far, like a browser: a revisit is its own entry.
+        private void Go(int step)
+        {
+            var index = FindHistory(step);
+            if (index < 0)
+                return;
+
+            _navigating = true;
+            try
+            {
+                _historyIndex = index;
+                Activate(_history[index]);
+            }
+            finally
+            {
+                _navigating = false;
+            }
+
+            NotifyHistory();
+        }
+
+        // Skips workspaces that have been removed since.
+        private int FindHistory(int step)
+        {
+            for (var i = _historyIndex + step; i >= 0 && i < _history.Count; i += step)
+            {
+                if (AgentRegistry.IsAgentWorkspace(_history[i]))
+                    return i;
+            }
+
+            return -1;
+        }
+
+        private void NotifyHistory()
+        {
+            OnPropertyChanged(nameof(CanGoBack));
+            OnPropertyChanged(nameof(CanGoForward));
+        }
+
+        public void Rename(ViewModels.Workspace workspace, string title)
+        {
+            var id = AgentRegistry.IdOf(workspace);
+            AgentUi.SetTitle(id, title);
+            workspace.Name = AgentUi.TitleOf(id);
+            ApplySearch();
+        }
+
+        // Moves the workspace to position index of the list as it is without it.
+        public void MoveTo(ViewModels.Workspace workspace, int index)
+        {
+            var others = AgentRegistry.Workspaces.Where(w => w != workspace).ToList();
+            AgentUi.MoveBefore(AgentRegistry.IdOf(workspace), index < others.Count ? AgentRegistry.IdOf(others[Math.Max(index, 0)]) : null);
+            AgentRegistry.Sort();
+            Refresh();
+        }
+
         public void RemoveWorkspace(ViewModels.Workspace workspace)
         {
+            var id = AgentRegistry.IdOf(workspace);
             AgentRegistry.Remove(workspace);
             _drafts.Remove(workspace);
 
@@ -300,7 +401,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 _state = null;
             }
 
-            AgentState.Delete(workspace.Name);
+            AgentState.Delete(id);
         }
 
         public void AddComment(ReviewComment comment)
@@ -308,6 +409,13 @@ namespace SourceGit.Extensions.AgentWorkspaces
             _comments.Add(comment);
             ReviewStatus = null;
             OnPropertyChanged(nameof(CanSubmitReview));
+        }
+
+        public void ReplaceComment(ReviewComment old, ReviewComment updated)
+        {
+            var index = _comments.IndexOf(old);
+            if (index >= 0)
+                _comments[index] = updated;
         }
 
         public void RemoveComment(ReviewComment comment)
@@ -366,7 +474,8 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 .Select(w => new AgentWorkspaceItem(w, string.Join(" · ", w.Repositories.Select(Path.GetFileName))))
                 .ToList();
             ApplySearch();
-            AgentState.Prune([.. AgentRegistry.Workspaces.Select(w => w.Name)]);
+            NotifyHistory();
+            AgentState.Prune([.. AgentRegistry.Workspaces.Select(AgentRegistry.IdOf)]);
 
             var isRemovedAgentWorkspace = active != null && !IsAgent(active) && !ViewModels.Preferences.Instance.Workspaces.Contains(active);
             if (isRemovedAgentWorkspace)
@@ -381,7 +490,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
                     _drafts[_reviewWorkspace] = (_comments, _reviewSummary);
 
                 _reviewWorkspace = review;
-                _state = review != null ? AgentState.Load(review.Name) : null;
+                _state = review != null ? AgentState.Load(AgentRegistry.IdOf(review)) : null;
                 var (comments, summary) = review != null && _drafts.TryGetValue(review, out var draft)
                     ? draft
                     : (new AvaloniaList<ReviewComment>(_state?.Comments ?? []), _state?.Summary ?? string.Empty);
@@ -505,6 +614,9 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         private readonly ViewModels.Launcher _launcher;
         private bool _isActive;
+        private readonly List<ViewModels.Workspace> _history = [];
+        private int _historyIndex = -1;
+        private bool _navigating;
         private DispatcherTimer _saveTimer;
         private WorkspaceState _state;
         private readonly HashSet<string> _restoredRepos = [];

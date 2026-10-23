@@ -19,6 +19,12 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         public static List<ViewModels.Workspace> Workspaces { get; private set; } = [];
 
+        // The sgws name agents use; the workspace's own Name is only the display title.
+        public static string IdOf(ViewModels.Workspace workspace)
+        {
+            return s_ids.GetValueOrDefault(workspace, workspace.Name);
+        }
+
         public static string GetSocket(ViewModels.Workspace workspace)
         {
             return s_sockets.GetValueOrDefault(workspace);
@@ -45,13 +51,14 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         public static void Remove(ViewModels.Workspace workspace)
         {
+            AgentUi.Forget(IdOf(workspace));
             foreach (var file in Directory.GetFiles(Dir, "*.json"))
             {
                 try
                 {
                     using var doc = JsonDocument.Parse(File.ReadAllText(file));
                     var name = doc.RootElement.TryGetProperty("name", out var n) ? n.GetString() : Path.GetFileNameWithoutExtension(file);
-                    if (name == workspace.Name)
+                    if (name == IdOf(workspace))
                         File.Delete(file);
                 }
                 catch
@@ -103,11 +110,15 @@ namespace SourceGit.Extensions.AgentWorkspaces
             var workspaces = new List<ViewModels.Workspace>();
             var sockets = new Dictionary<ViewModels.Workspace, string>();
             var isFirstSync = !s_synced;
+            var ids = new Dictionary<ViewModels.Workspace, string>();
             var newestFocus = 0L;
+            var entries = ReadEntries();
+            AgentUi.Track(entries.Select(e => e.Item1));
 
-            foreach (var (name, entry) in ReadEntries())
+            foreach (var (name, entry) in entries)
             {
-                var workspace = Workspaces.Find(w => w.Name == name) ?? new ViewModels.Workspace { Name = name, Color = DefaultColor(name) };
+                var workspace = Workspaces.Find(w => IdOf(w) == name) ?? new ViewModels.Workspace { Name = AgentUi.TitleOf(name), Color = DefaultColor(name) };
+                ids[workspace] = name;
                 if (entry.Color.HasValue)
                     workspace.Color = entry.Color.Value;
 
@@ -133,6 +144,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 {
                     newestFocus = entry.Focus;
                     s_focusRequest = workspace;
+                    AgentUi.MoveToTop(name);
                 }
                 s_lastFocus[name] = Math.Max(lastFocus, entry.Focus);
 
@@ -142,10 +154,18 @@ namespace SourceGit.Extensions.AgentWorkspaces
                 s_lastDiff[name] = Math.Max(lastDiff, entry.DiffSeq);
             }
 
+            s_ids = ids;
             Workspaces = workspaces;
+            Sort();
             s_sockets = sockets;
             s_synced = true;
             Changed?.Invoke();
+        }
+
+        // Orders Workspaces like the sidebar (AgentUi order).
+        public static void Sort()
+        {
+            Workspaces = [.. Workspaces.OrderBy(w => AgentUi.IndexOf(IdOf(w)))];
         }
 
         private static List<(string, Entry)> ReadEntries()
@@ -208,6 +228,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
 
         private static FileSystemWatcher s_watcher;
         private static DispatcherTimer s_debounce;
+        private static Dictionary<ViewModels.Workspace, string> s_ids = [];
         private static Dictionary<ViewModels.Workspace, string> s_sockets = [];
         private static readonly Dictionary<string, long> s_lastFocus = [];
         private static readonly Dictionary<string, long> s_lastDiff = [];

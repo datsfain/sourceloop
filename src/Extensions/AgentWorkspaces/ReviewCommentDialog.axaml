@@ -17,7 +17,7 @@
               BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border0}"
               PointerPressed="BeginMoveWindow"/>
       <TextBlock Classes="bold"
-                 Text="Add review comment"
+                 Text="{Binding #ThisControl.Title}"
                  HorizontalAlignment="Center" VerticalAlignment="Center"
                  IsHitTestVisible="False"/>
       <v:CaptionButtons HorizontalAlignment="Right"
