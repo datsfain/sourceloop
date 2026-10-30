@@ -180,7 +180,8 @@ namespace SourceGit.Extensions.AgentWorkspaces
                     var name = root.TryGetProperty("name", out var n) ? n.GetString() : Path.GetFileNameWithoutExtension(file);
                     var repos = root.GetProperty("repos").EnumerateArray()
                         .Select(r => r.GetString()?.Replace('\\', '/').TrimEnd('/'))
-                        .Where(r => !string.IsNullOrEmpty(r) && Directory.Exists(r))
+                        .Select(FindRepoRoot)
+                        .Where(r => !string.IsNullOrEmpty(r))
                         .Distinct()
                         .ToList();
 
@@ -191,7 +192,7 @@ namespace SourceGit.Extensions.AgentWorkspaces
                     var diffSeq = 0L;
                     if (root.TryGetProperty("diff", out var d) && d.ValueKind == JsonValueKind.Object)
                     {
-                        var diffRepo = d.TryGetProperty("repo", out var dr) ? dr.GetString()?.Replace('\\', '/').TrimEnd('/') : null;
+                        var diffRepo = FindRepoRoot(d.TryGetProperty("repo", out var dr) ? dr.GetString()?.Replace('\\', '/').TrimEnd('/') : null);
                         var diffBase = d.TryGetProperty("base", out var db) ? db.GetString() : null;
                         var diffTarget = d.TryGetProperty("target", out var dt) ? dt.GetString() : null;
                         if (!string.IsNullOrEmpty(diffRepo) && !string.IsNullOrEmpty(diffBase) && !string.IsNullOrEmpty(diffTarget))
@@ -215,6 +216,23 @@ namespace SourceGit.Extensions.AgentWorkspaces
             }
 
             return entries;
+        }
+
+        // A file or subfolder of a repository stands for the repository itself: git reports changes relative to the
+        // repository root, so opened from anywhere else every diff comes back empty.
+        private static string FindRepoRoot(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return null;
+
+            for (var dir = File.Exists(path) ? Path.GetDirectoryName(path) : path; !string.IsNullOrEmpty(dir); dir = Path.GetDirectoryName(dir))
+            {
+                var git = Path.Combine(dir, ".git");
+                if (Directory.Exists(git) || File.Exists(git))
+                    return dir.Replace('\\', '/');
+            }
+
+            return Directory.Exists(path) ? path : null;
         }
 
         private static uint DefaultColor(string name)
