@@ -38,6 +38,9 @@ fi
 rm -f SourceGit/*.dbg
 rm -f SourceGit/*.pdb
 
+# The build leaves some libraries at 0744; appimagetool refuses those, and other users could not load them from the deb.
+chmod -R a+rX SourceGit
+
 mkdir -p SourceGit.AppDir/opt
 mkdir -p SourceGit.AppDir/usr/share/metainfo
 mkdir -p SourceGit.AppDir/usr/share/applications
