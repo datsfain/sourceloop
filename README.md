@@ -141,28 +141,6 @@ For **Linux** users:
 
   If your distribution isn't using `dnf`, please refer to the documentation of your distribution on how to add an `rpm` repository.
 
-* Thanks [@gadfly3173](https://github.com/gadfly3173) for providing `deb` repository, hosted on https://deb-repo.gadfly.vip
-
-  ```shell
-  # Import GPG key
-  curl -fsSL https://deb-repo.gadfly.vip/public.key | sudo gpg --dearmor -o /usr/share/keyrings/deb-repo.gpg
-
-  # Add repository (DEB822 format, recommended for Bookworm+ / 22.04+)
-  echo "Types: deb
-  URIs: https://deb-repo.gadfly.vip
-  Suites: stable
-  Components: main
-  Architectures: $(dpkg --print-architecture)
-  Signed-By: /usr/share/keyrings/deb-repo.gpg" | sudo tee /etc/apt/sources.list.d/deb-repo.sources
-  
-  # Or use one‑line format for older releases:
-  # echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/deb-repo.gpg] https://deb-repo.gadfly.vip stable main" | sudo tee /  etc/apt/sources.list.d/deb-repo.list
-  
-  # Update and install
-  sudo apt update
-  sudo apt install sourcegit
-  ```
-
 * `AOSC OS`: In addition to AMD64 and ARM64, support for LoongArch and RISC-V has been added.
   ```shell
   sudo oma install sourcegit
@@ -199,6 +177,25 @@ For `OrcaRouter`:
 * `Server` should be `https://api.orcarouter.ai/v1`
 * `API Key` should be an OrcaRouter API key (prefixed with `sk-orca-`)
 * A good starting `Model` is `orcarouter/auto`, which routes each request to the best available model
+
+For `Cheaper Inference`:
+
+* `Server` should be `https://api.cheaperinference.com/v1`
+* `API Key` should be a Cheaper Inference API key (prefixed with `ci_live_`)
+* A good starting `Model` is `gpt-5.4-mini`
+
+For `Opper`:
+
+* `Server` should be `https://api.opper.ai/v3/compat`
+* `API Key` should be an Opper API key, created at https://platform.opper.ai
+* A good starting `Model` is `gpt-5.4-mini`
+
+For `API Route`:
+
+* `Server` should be `https://global.api-route.com/v1`
+* `API Key` should be your API Route API key
+* `Model` can be `gpt-6.1-sol` if it is available to your key; otherwise select an available chat model from the fetched catalog
+* See the [API documentation](https://github.com/DennyHo0917/api-route/blob/main/API.md) for authentication and model discovery
 
 For other AI service:
 

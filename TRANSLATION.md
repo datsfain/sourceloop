@@ -6,13 +6,24 @@ This document shows the translation status of each locale file in the repository
 
 ### ![en_US](https://img.shields.io/badge/en__US-%E2%88%9A-brightgreen)
 
-### ![de__DE](https://img.shields.io/badge/de__DE-95.66%25-yellow)
+### ![ca__ES](https://img.shields.io/badge/ca__ES-%E2%88%9A-brightgreen)
+
+### ![de__DE](https://img.shields.io/badge/de__DE-93.85%25-yellow)
 
 <details>
 <summary>Missing keys in de_DE.axaml</summary>
 
 - Text.Blame.Tips
+- Text.BranchCM.CheckoutAsWorktree
 - Text.BranchTree.PushURL
+- Text.CheckoutAsWorktree
+- Text.CheckoutAsWorktree.LocalBranch
+- Text.CheckoutAsWorktree.NewBranchName
+- Text.CheckoutAsWorktree.NewBranchName.Placeholder
+- Text.CheckoutAsWorktree.RemoteBranch
+- Text.CheckoutAsWorktree.Tracking
+- Text.CheckoutAsWorktree.WorktreePath
+- Text.CheckoutAsWorktree.WorktreePath.Placeholder
 - Text.CommitDetail.Files.Tips
 - Text.Dashboard
 - Text.Diff.Binary.ViewContentOfNew
@@ -28,6 +39,7 @@ This document shows the translation status of each locale file in the repository
 - Text.OpenAppDataDir.Config
 - Text.Preferences.AI.ExtraHeaders
 - Text.Preferences.AI.ReasoningEffortLevel
+- Text.Preferences.Shell.Args.ToolTip
 - Text.Remote.ResetPushURL
 - Text.RemoteCM.SetPushURL
 - Text.Repository.Search.Method
@@ -52,21 +64,40 @@ This document shows the translation status of each locale file in the repository
 - Text.SSHKeyHelper.Path
 - Text.SSHKeyHelper.PublicKey
 - Text.SSHKeyHelper.Title
+- Text.Statistics.Commits
 - Text.Statistics.Tips
+- Text.Statistics.TopAuthors
+- Text.Statistics.TopAuthors.Count
+- Text.Statistics.TopAuthors.Percentage
+- Text.Statistics.TopAuthors.Tip
 - Text.Terminate
+- Text.TrustRepository
+- Text.TrustRepository.CommandTip
+- Text.TrustRepository.Description
+- Text.TrustRepository.Path
+- Text.TrustRepository.ScanSkipped
 - Text.WorkingCopy.CollapseSidebar
 - Text.WorkingCopy.DiscardAll
 - Text.WorkingCopy.ExpandSidebar
 
 </details>
 
-### ![el__GR](https://img.shields.io/badge/el__GR-95.19%25-yellow)
+### ![el__GR](https://img.shields.io/badge/el__GR-93.38%25-yellow)
 
 <details>
 <summary>Missing keys in el_GR.axaml</summary>
 
 - Text.Blame.Tips
+- Text.BranchCM.CheckoutAsWorktree
 - Text.BranchTree.PushURL
+- Text.CheckoutAsWorktree
+- Text.CheckoutAsWorktree.LocalBranch
+- Text.CheckoutAsWorktree.NewBranchName
+- Text.CheckoutAsWorktree.NewBranchName.Placeholder
+- Text.CheckoutAsWorktree.RemoteBranch
+- Text.CheckoutAsWorktree.Tracking
+- Text.CheckoutAsWorktree.WorktreePath
+- Text.CheckoutAsWorktree.WorktreePath.Placeholder
 - Text.CommitDetail.Files.Tips
 - Text.Dashboard
 - Text.Diff.Binary.ViewContentOfNew
@@ -83,6 +114,7 @@ This document shows the translation status of each locale file in the repository
 - Text.OpenAppDataDir.Config
 - Text.Preferences.AI.ExtraHeaders
 - Text.Preferences.AI.ReasoningEffortLevel
+- Text.Preferences.Shell.Args.ToolTip
 - Text.Remote.ResetPushURL
 - Text.RemoteCM.SetPushURL
 - Text.Repository.FilterCommits.Collapse
@@ -110,8 +142,18 @@ This document shows the translation status of each locale file in the repository
 - Text.SSHKeyHelper.Path
 - Text.SSHKeyHelper.PublicKey
 - Text.SSHKeyHelper.Title
+- Text.Statistics.Commits
 - Text.Statistics.Tips
+- Text.Statistics.TopAuthors
+- Text.Statistics.TopAuthors.Count
+- Text.Statistics.TopAuthors.Percentage
+- Text.Statistics.TopAuthors.Tip
 - Text.Terminate
+- Text.TrustRepository
+- Text.TrustRepository.CommandTip
+- Text.TrustRepository.Description
+- Text.TrustRepository.Path
+- Text.TrustRepository.ScanSkipped
 - Text.WorkingCopy.CollapseSidebar
 - Text.WorkingCopy.DiscardAll
 - Text.WorkingCopy.ExpandSidebar
@@ -119,18 +161,16 @@ This document shows the translation status of each locale file in the repository
 
 </details>
 
-### ![es__ES](https://img.shields.io/badge/es__ES-99.72%25-yellow)
+### ![es__ES](https://img.shields.io/badge/es__ES-99.91%25-yellow)
 
 <details>
 <summary>Missing keys in es_ES.axaml</summary>
 
-- Text.CommitDetail.Files.Tips
-- Text.WorkingCopy.CollapseSidebar
-- Text.WorkingCopy.ExpandSidebar
+- Text.Preferences.Shell.Args.ToolTip
 
 </details>
 
-### ![fr__FR](https://img.shields.io/badge/fr__FR-91.42%25-yellow)
+### ![fr__FR](https://img.shields.io/badge/fr__FR-89.66%25-yellow)
 
 <details>
 <summary>Missing keys in fr_FR.axaml</summary>
@@ -141,7 +181,16 @@ This document shows the translation status of each locale file in the repository
 - Text.Bisect.WaitingForCheckoutAnother
 - Text.Bisect.WaitingForFirstBad
 - Text.Blame.Tips
+- Text.BranchCM.CheckoutAsWorktree
 - Text.BranchTree.PushURL
+- Text.CheckoutAsWorktree
+- Text.CheckoutAsWorktree.LocalBranch
+- Text.CheckoutAsWorktree.NewBranchName
+- Text.CheckoutAsWorktree.NewBranchName.Placeholder
+- Text.CheckoutAsWorktree.RemoteBranch
+- Text.CheckoutAsWorktree.Tracking
+- Text.CheckoutAsWorktree.WorktreePath
+- Text.CheckoutAsWorktree.WorktreePath.Placeholder
 - Text.CheckoutDetached
 - Text.CheckoutDetached.Target
 - Text.CheckoutDetached.Warning
@@ -185,6 +234,7 @@ This document shows the translation status of each locale file in the repository
 - Text.Preferences.AI.ExtraHeaders
 - Text.Preferences.AI.ReasoningEffortLevel
 - Text.Preferences.General.UseCompactBranchNames
+- Text.Preferences.Shell.Args.ToolTip
 - Text.Rebase.Test
 - Text.Rebase.Test.OK
 - Text.Rebase.Test.UnknownError
@@ -216,10 +266,20 @@ This document shows the translation status of each locale file in the repository
 - Text.SSHKeyHelper.Path
 - Text.SSHKeyHelper.PublicKey
 - Text.SSHKeyHelper.Title
+- Text.Statistics.Commits
 - Text.Statistics.Tips
+- Text.Statistics.TopAuthors
+- Text.Statistics.TopAuthors.Count
+- Text.Statistics.TopAuthors.Percentage
+- Text.Statistics.TopAuthors.Tip
 - Text.TagCM.Checkout
 - Text.TagCM.Merge
 - Text.Terminate
+- Text.TrustRepository
+- Text.TrustRepository.CommandTip
+- Text.TrustRepository.Description
+- Text.TrustRepository.Path
+- Text.TrustRepository.ScanSkipped
 - Text.UpdateSubmodules.Recursive
 - Text.WorkingCopy.AddToGitIgnore.UntrackedInSameFolder
 - Text.WorkingCopy.CollapseSidebar
@@ -229,7 +289,7 @@ This document shows the translation status of each locale file in the repository
 
 </details>
 
-### ![he__IL](https://img.shields.io/badge/he__IL-91.42%25-yellow)
+### ![he__IL](https://img.shields.io/badge/he__IL-89.66%25-yellow)
 
 <details>
 <summary>Missing keys in he_IL.axaml</summary>
@@ -240,7 +300,16 @@ This document shows the translation status of each locale file in the repository
 - Text.Bisect.WaitingForCheckoutAnother
 - Text.Bisect.WaitingForFirstBad
 - Text.Blame.Tips
+- Text.BranchCM.CheckoutAsWorktree
 - Text.BranchTree.PushURL
+- Text.CheckoutAsWorktree
+- Text.CheckoutAsWorktree.LocalBranch
+- Text.CheckoutAsWorktree.NewBranchName
+- Text.CheckoutAsWorktree.NewBranchName.Placeholder
+- Text.CheckoutAsWorktree.RemoteBranch
+- Text.CheckoutAsWorktree.Tracking
+- Text.CheckoutAsWorktree.WorktreePath
+- Text.CheckoutAsWorktree.WorktreePath.Placeholder
 - Text.CheckoutDetached
 - Text.CheckoutDetached.Target
 - Text.CheckoutDetached.Warning
@@ -284,6 +353,7 @@ This document shows the translation status of each locale file in the repository
 - Text.Preferences.AI.ExtraHeaders
 - Text.Preferences.AI.ReasoningEffortLevel
 - Text.Preferences.General.UseCompactBranchNames
+- Text.Preferences.Shell.Args.ToolTip
 - Text.Rebase.Test
 - Text.Rebase.Test.OK
 - Text.Rebase.Test.UnknownError
@@ -315,10 +385,20 @@ This document shows the translation status of each locale file in the repository
 - Text.SSHKeyHelper.Path
 - Text.SSHKeyHelper.PublicKey
 - Text.SSHKeyHelper.Title
+- Text.Statistics.Commits
 - Text.Statistics.Tips
+- Text.Statistics.TopAuthors
+- Text.Statistics.TopAuthors.Count
+- Text.Statistics.TopAuthors.Percentage
+- Text.Statistics.TopAuthors.Tip
 - Text.TagCM.Checkout
 - Text.TagCM.Merge
 - Text.Terminate
+- Text.TrustRepository
+- Text.TrustRepository.CommandTip
+- Text.TrustRepository.Description
+- Text.TrustRepository.Path
+- Text.TrustRepository.ScanSkipped
 - Text.UpdateSubmodules.Recursive
 - Text.WorkingCopy.AddToGitIgnore.UntrackedInSameFolder
 - Text.WorkingCopy.CollapseSidebar
@@ -328,13 +408,22 @@ This document shows the translation status of each locale file in the repository
 
 </details>
 
-### ![id__ID](https://img.shields.io/badge/id__ID-95.66%25-yellow)
+### ![id__ID](https://img.shields.io/badge/id__ID-93.85%25-yellow)
 
 <details>
 <summary>Missing keys in id_ID.axaml</summary>
 
 - Text.Blame.Tips
+- Text.BranchCM.CheckoutAsWorktree
 - Text.BranchTree.PushURL
+- Text.CheckoutAsWorktree
+- Text.CheckoutAsWorktree.LocalBranch
+- Text.CheckoutAsWorktree.NewBranchName
+- Text.CheckoutAsWorktree.NewBranchName.Placeholder
+- Text.CheckoutAsWorktree.RemoteBranch
+- Text.CheckoutAsWorktree.Tracking
+- Text.CheckoutAsWorktree.WorktreePath
+- Text.CheckoutAsWorktree.WorktreePath.Placeholder
 - Text.CommitDetail.Files.Tips
 - Text.Dashboard
 - Text.Diff.Binary.ViewContentOfNew
@@ -349,6 +438,7 @@ This document shows the translation status of each locale file in the repository
 - Text.OpenAppDataDir.Cache
 - Text.OpenAppDataDir.Config
 - Text.Preferences.AI.ReasoningEffortLevel
+- Text.Preferences.Shell.Args.ToolTip
 - Text.Remote.ResetPushURL
 - Text.RemoteCM.SetPushURL
 - Text.Repository.Search.Method
@@ -373,8 +463,18 @@ This document shows the translation status of each locale file in the repository
 - Text.SSHKeyHelper.Path
 - Text.SSHKeyHelper.PublicKey
 - Text.SSHKeyHelper.Title
+- Text.Statistics.Commits
 - Text.Statistics.Tips
+- Text.Statistics.TopAuthors
+- Text.Statistics.TopAuthors.Count
+- Text.Statistics.TopAuthors.Percentage
+- Text.Statistics.TopAuthors.Tip
 - Text.Terminate
+- Text.TrustRepository
+- Text.TrustRepository.CommandTip
+- Text.TrustRepository.Description
+- Text.TrustRepository.Path
+- Text.TrustRepository.ScanSkipped
 - Text.WorkingCopy.CollapseSidebar
 - Text.WorkingCopy.DiscardAll
 - Text.WorkingCopy.ExpandSidebar
@@ -382,7 +482,7 @@ This document shows the translation status of each locale file in the repository
 
 </details>
 
-### ![it__IT](https://img.shields.io/badge/it__IT-85.28%25-yellow)
+### ![it__IT](https://img.shields.io/badge/it__IT-83.69%25-yellow)
 
 <details>
 <summary>Missing keys in it_IT.axaml</summary>
@@ -396,9 +496,18 @@ This document shows the translation status of each locale file in the repository
 - Text.Bisect.WaitingForCheckoutAnother
 - Text.Bisect.WaitingForFirstBad
 - Text.Blame.Tips
+- Text.BranchCM.CheckoutAsWorktree
 - Text.BranchCM.CompareWithSpecial
 - Text.BranchTree.PushURL
 - Text.ChangeCM.ResetFileTo
+- Text.CheckoutAsWorktree
+- Text.CheckoutAsWorktree.LocalBranch
+- Text.CheckoutAsWorktree.NewBranchName
+- Text.CheckoutAsWorktree.NewBranchName.Placeholder
+- Text.CheckoutAsWorktree.RemoteBranch
+- Text.CheckoutAsWorktree.Tracking
+- Text.CheckoutAsWorktree.WorktreePath
+- Text.CheckoutAsWorktree.WorktreePath.Placeholder
 - Text.CheckoutBranchFromStash
 - Text.CheckoutBranchFromStash.Branch
 - Text.CheckoutBranchFromStash.Stash
@@ -415,7 +524,6 @@ This document shows the translation status of each locale file in the repository
 - Text.CommitCM.CopyCommitterTime
 - Text.CommitDetail.CollapseToBottom
 - Text.CommitDetail.Files.Tips
-- Text.CommitMessageTextBox.Column
 - Text.Compare.Changes
 - Text.Compare.Commits
 - Text.Compare.Commits.LeftOnly
@@ -491,6 +599,7 @@ This document shows the translation status of each locale file in the repository
 - Text.Preferences.General.Use24Hours
 - Text.Preferences.General.UseCompactBranchNames
 - Text.Preferences.Git.UseStashAndReapplyByDefault
+- Text.Preferences.Shell.Args.ToolTip
 - Text.Rebase.NoVerify
 - Text.Rebase.Test
 - Text.Rebase.Test.OK
@@ -528,12 +637,22 @@ This document shows the translation status of each locale file in the repository
 - Text.SSHKeyHelper.Title
 - Text.StashCM.ApplyFileChanges
 - Text.StashCM.Branch
+- Text.Statistics.Commits
 - Text.Statistics.Tips
+- Text.Statistics.TopAuthors
+- Text.Statistics.TopAuthors.Count
+- Text.Statistics.TopAuthors.Percentage
+- Text.Statistics.TopAuthors.Tip
 - Text.SubmoduleRevisionCompare
 - Text.SubmoduleRevisionCompare.OpenDetails
 - Text.TagCM.Checkout
 - Text.TagCM.Merge
 - Text.Terminate
+- Text.TrustRepository
+- Text.TrustRepository.CommandTip
+- Text.TrustRepository.Description
+- Text.TrustRepository.Path
+- Text.TrustRepository.ScanSkipped
 - Text.UpdateSubmodules.Recursive
 - Text.WorkingCopy.AddToGitIgnore.UntrackedInSameFolder
 - Text.WorkingCopy.CollapseSidebar
@@ -546,18 +665,38 @@ This document shows the translation status of each locale file in the repository
 
 </details>
 
-### ![ja__JP](https://img.shields.io/badge/ja__JP-99.72%25-yellow)
+### ![ja__JP](https://img.shields.io/badge/ja__JP-97.86%25-yellow)
 
 <details>
 <summary>Missing keys in ja_JP.axaml</summary>
 
+- Text.BranchCM.CheckoutAsWorktree
+- Text.CheckoutAsWorktree
+- Text.CheckoutAsWorktree.LocalBranch
+- Text.CheckoutAsWorktree.NewBranchName
+- Text.CheckoutAsWorktree.NewBranchName.Placeholder
+- Text.CheckoutAsWorktree.RemoteBranch
+- Text.CheckoutAsWorktree.Tracking
+- Text.CheckoutAsWorktree.WorktreePath
+- Text.CheckoutAsWorktree.WorktreePath.Placeholder
 - Text.CommitDetail.Files.Tips
+- Text.Preferences.Shell.Args.ToolTip
+- Text.Statistics.Commits
+- Text.Statistics.TopAuthors
+- Text.Statistics.TopAuthors.Count
+- Text.Statistics.TopAuthors.Percentage
+- Text.Statistics.TopAuthors.Tip
+- Text.TrustRepository
+- Text.TrustRepository.CommandTip
+- Text.TrustRepository.Description
+- Text.TrustRepository.Path
+- Text.TrustRepository.ScanSkipped
 - Text.WorkingCopy.CollapseSidebar
 - Text.WorkingCopy.ExpandSidebar
 
 </details>
 
-### ![ko__KR](https://img.shields.io/badge/ko__KR-92.83%25-yellow)
+### ![ko__KR](https://img.shields.io/badge/ko__KR-91.05%25-yellow)
 
 <details>
 <summary>Missing keys in ko_KR.axaml</summary>
@@ -565,7 +704,16 @@ This document shows the translation status of each locale file in the repository
 - Text.Bisect.WaitingForCheckoutAnother
 - Text.Bisect.WaitingForFirstBad
 - Text.Blame.Tips
+- Text.BranchCM.CheckoutAsWorktree
 - Text.BranchTree.PushURL
+- Text.CheckoutAsWorktree
+- Text.CheckoutAsWorktree.LocalBranch
+- Text.CheckoutAsWorktree.NewBranchName
+- Text.CheckoutAsWorktree.NewBranchName.Placeholder
+- Text.CheckoutAsWorktree.RemoteBranch
+- Text.CheckoutAsWorktree.Tracking
+- Text.CheckoutAsWorktree.WorktreePath
+- Text.CheckoutAsWorktree.WorktreePath.Placeholder
 - Text.CheckoutDetached
 - Text.CheckoutDetached.Target
 - Text.CheckoutDetached.Warning
@@ -601,6 +749,7 @@ This document shows the translation status of each locale file in the repository
 - Text.OpenAppDataDir.Config
 - Text.Preferences.AI.ExtraHeaders
 - Text.Preferences.AI.ReasoningEffortLevel
+- Text.Preferences.Shell.Args.ToolTip
 - Text.Remote.ResetPushURL
 - Text.RemoteCM.SetPushURL
 - Text.Repository.FilterCommits.Collapse
@@ -628,10 +777,20 @@ This document shows the translation status of each locale file in the repository
 - Text.SSHKeyHelper.Path
 - Text.SSHKeyHelper.PublicKey
 - Text.SSHKeyHelper.Title
+- Text.Statistics.Commits
 - Text.Statistics.Tips
+- Text.Statistics.TopAuthors
+- Text.Statistics.TopAuthors.Count
+- Text.Statistics.TopAuthors.Percentage
+- Text.Statistics.TopAuthors.Tip
 - Text.TagCM.Checkout
 - Text.TagCM.Merge
 - Text.Terminate
+- Text.TrustRepository
+- Text.TrustRepository.CommandTip
+- Text.TrustRepository.Description
+- Text.TrustRepository.Path
+- Text.TrustRepository.ScanSkipped
 - Text.UpdateSubmodules.Recursive
 - Text.WorkingCopy.AddToGitIgnore.UntrackedInSameFolder
 - Text.WorkingCopy.CollapseSidebar
@@ -641,7 +800,7 @@ This document shows the translation status of each locale file in the repository
 
 </details>
 
-### ![pt__BR](https://img.shields.io/badge/pt__BR-60.19%25-red)
+### ![pt__BR](https://img.shields.io/badge/pt__BR-58.99%25-red)
 
 <details>
 <summary>Missing keys in pt_BR.axaml</summary>
@@ -656,6 +815,7 @@ This document shows the translation status of each locale file in the repository
 - Text.Bisect.WaitingForFirstBad
 - Text.Blame.BlameOnPreviousRevision
 - Text.Blame.Tips
+- Text.BranchCM.CheckoutAsWorktree
 - Text.BranchCM.CompareWithSpecial
 - Text.BranchCM.InteractiveRebase.Manually
 - Text.BranchTree.AheadBehind
@@ -674,6 +834,14 @@ This document shows the translation status of each locale file in the repository
 - Text.Checkout.WarnUpdatingSubmodules
 - Text.Checkout.WithFastForward
 - Text.Checkout.WithFastForward.Upstream
+- Text.CheckoutAsWorktree
+- Text.CheckoutAsWorktree.LocalBranch
+- Text.CheckoutAsWorktree.NewBranchName
+- Text.CheckoutAsWorktree.NewBranchName.Placeholder
+- Text.CheckoutAsWorktree.RemoteBranch
+- Text.CheckoutAsWorktree.Tracking
+- Text.CheckoutAsWorktree.WorktreePath
+- Text.CheckoutAsWorktree.WorktreePath.Placeholder
 - Text.CheckoutBranchFromStash
 - Text.CheckoutBranchFromStash.Branch
 - Text.CheckoutBranchFromStash.Stash
@@ -713,7 +881,6 @@ This document shows the translation status of each locale file in the repository
 - Text.CommitDetail.Info.CopyNameAndEmail
 - Text.CommitDetail.Info.Key
 - Text.CommitDetail.Info.Signer
-- Text.CommitMessageTextBox.Column
 - Text.CommitMessageTextBox.Placeholder
 - Text.CommitMessageTextBox.SubjectCount
 - Text.Compare.Changes
@@ -921,7 +1088,7 @@ This document shows the translation status of each locale file in the repository
 - Text.Preferences.Git.UseLibsecret
 - Text.Preferences.Git.UseStashAndReapplyByDefault
 - Text.Preferences.Shell.Args
-- Text.Preferences.Shell.Args.Tip
+- Text.Preferences.Shell.Args.ToolTip
 - Text.Push.New
 - Text.Push.Revision
 - Text.Push.Revision.Title
@@ -1007,7 +1174,12 @@ This document shows the translation status of each locale file in the repository
 - Text.StashCM.Branch
 - Text.StashCM.CopyMessage
 - Text.StashCM.SaveAsPatch
+- Text.Statistics.Commits
 - Text.Statistics.Tips
+- Text.Statistics.TopAuthors
+- Text.Statistics.TopAuthors.Count
+- Text.Statistics.TopAuthors.Percentage
+- Text.Statistics.TopAuthors.Tip
 - Text.Submodule.Branch
 - Text.Submodule.CopyBranch
 - Text.Submodule.Deinit
@@ -1038,6 +1210,11 @@ This document shows the translation status of each locale file in the repository
 - Text.TagCM.DeleteMultiple
 - Text.TagCM.Merge
 - Text.Terminate
+- Text.TrustRepository
+- Text.TrustRepository.CommandTip
+- Text.TrustRepository.Description
+- Text.TrustRepository.Path
+- Text.TrustRepository.ScanSkipped
 - Text.UpdateSubmodules.Recursive
 - Text.UpdateSubmodules.UpdateToRemoteTrackingBranch
 - Text.ViewLogs
@@ -1071,36 +1248,16 @@ This document shows the translation status of each locale file in the repository
 
 </details>
 
-### ![ru__RU](https://img.shields.io/badge/ru__RU-98.02%25-yellow)
+### ![ru__RU](https://img.shields.io/badge/ru__RU-99.91%25-yellow)
 
 <details>
 <summary>Missing keys in ru_RU.axaml</summary>
 
-- Text.Blame.Tips
-- Text.BranchTree.PushURL
-- Text.CommitDetail.Files.Tips
-- Text.Dashboard
-- Text.Histories.AdvancedOptions
-- Text.Hotkeys.Repo.ToggleCommitDetailPanel
-- Text.Hotkeys.Repo.ToggleSearchCommits
-- Text.Hotkeys.Repo.ViewDashboard
-- Text.Preferences.AI.ExtraHeaders
-- Text.Remote.ResetPushURL
-- Text.RemoteCM.SetPushURL
-- Text.Repository.Search.Method
-- Text.Repository.Search.ToolTip
-- Text.SetPushUrl
-- Text.SetPushUrl.PushURL
-- Text.SetPushUrl.Remote
-- Text.SetPushUrl.URL
-- Text.Statistics.Tips
-- Text.WorkingCopy.CollapseSidebar
-- Text.WorkingCopy.DiscardAll
-- Text.WorkingCopy.ExpandSidebar
+- Text.Preferences.Shell.Args.ToolTip
 
 </details>
 
-### ![ta__IN](https://img.shields.io/badge/ta__IN-61.79%25-red)
+### ![ta__IN](https://img.shields.io/badge/ta__IN-60.58%25-red)
 
 <details>
 <summary>Missing keys in ta_IN.axaml</summary>
@@ -1132,6 +1289,7 @@ This document shows the translation status of each locale file in the repository
 - Text.Blame.BlameOnPreviousRevision
 - Text.Blame.IgnoreWhitespace
 - Text.Blame.Tips
+- Text.BranchCM.CheckoutAsWorktree
 - Text.BranchCM.CompareTwo
 - Text.BranchCM.CompareWith
 - Text.BranchCM.CompareWithHead
@@ -1162,6 +1320,14 @@ This document shows the translation status of each locale file in the repository
 - Text.Checkout.WarnUpdatingSubmodules
 - Text.Checkout.WithFastForward
 - Text.Checkout.WithFastForward.Upstream
+- Text.CheckoutAsWorktree
+- Text.CheckoutAsWorktree.LocalBranch
+- Text.CheckoutAsWorktree.NewBranchName
+- Text.CheckoutAsWorktree.NewBranchName.Placeholder
+- Text.CheckoutAsWorktree.RemoteBranch
+- Text.CheckoutAsWorktree.Tracking
+- Text.CheckoutAsWorktree.WorktreePath
+- Text.CheckoutAsWorktree.WorktreePath.Placeholder
 - Text.CheckoutBranchFromStash
 - Text.CheckoutBranchFromStash.Branch
 - Text.CheckoutBranchFromStash.Stash
@@ -1198,7 +1364,6 @@ This document shows the translation status of each locale file in the repository
 - Text.CommitDetail.Info.CopyNameAndEmail
 - Text.CommitDetail.Info.Key
 - Text.CommitDetail.Info.Signer
-- Text.CommitMessageTextBox.Column
 - Text.CommitMessageTextBox.Placeholder
 - Text.CommitMessageTextBox.SubjectCount
 - Text.Compare.Changes
@@ -1381,7 +1546,7 @@ This document shows the translation status of each locale file in the repository
 - Text.Preferences.Git.UseLibsecret
 - Text.Preferences.Git.UseStashAndReapplyByDefault
 - Text.Preferences.Shell.Args
-- Text.Preferences.Shell.Args.Tip
+- Text.Preferences.Shell.Args.ToolTip
 - Text.Push.New
 - Text.Push.Revision
 - Text.Push.Revision.Title
@@ -1451,7 +1616,12 @@ This document shows the translation status of each locale file in the repository
 - Text.StashCM.ApplyFileChanges
 - Text.StashCM.Branch
 - Text.StashCM.CopyMessage
+- Text.Statistics.Commits
 - Text.Statistics.Tips
+- Text.Statistics.TopAuthors
+- Text.Statistics.TopAuthors.Count
+- Text.Statistics.TopAuthors.Percentage
+- Text.Statistics.TopAuthors.Tip
 - Text.Submodule.Branch
 - Text.Submodule.CopyBranch
 - Text.Submodule.Deinit
@@ -1482,6 +1652,11 @@ This document shows the translation status of each locale file in the repository
 - Text.TagCM.DeleteMultiple
 - Text.TagCM.Merge
 - Text.Terminate
+- Text.TrustRepository
+- Text.TrustRepository.CommandTip
+- Text.TrustRepository.Description
+- Text.TrustRepository.Path
+- Text.TrustRepository.ScanSkipped
 - Text.UpdateSubmodules.Target
 - Text.UpdateSubmodules.Recursive
 - Text.UpdateSubmodules.UpdateToRemoteTrackingBranch
@@ -1513,7 +1688,7 @@ This document shows the translation status of each locale file in the repository
 
 </details>
 
-### ![uk__UA](https://img.shields.io/badge/uk__UA-62.55%25-red)
+### ![uk__UA](https://img.shields.io/badge/uk__UA-61.32%25-red)
 
 <details>
 <summary>Missing keys in uk_UA.axaml</summary>
@@ -1545,6 +1720,7 @@ This document shows the translation status of each locale file in the repository
 - Text.Blame.BlameOnPreviousRevision
 - Text.Blame.IgnoreWhitespace
 - Text.Blame.Tips
+- Text.BranchCM.CheckoutAsWorktree
 - Text.BranchCM.CompareTwo
 - Text.BranchCM.CompareWith
 - Text.BranchCM.CompareWithHead
@@ -1575,6 +1751,14 @@ This document shows the translation status of each locale file in the repository
 - Text.Checkout.WarnUpdatingSubmodules
 - Text.Checkout.WithFastForward
 - Text.Checkout.WithFastForward.Upstream
+- Text.CheckoutAsWorktree
+- Text.CheckoutAsWorktree.LocalBranch
+- Text.CheckoutAsWorktree.NewBranchName
+- Text.CheckoutAsWorktree.NewBranchName.Placeholder
+- Text.CheckoutAsWorktree.RemoteBranch
+- Text.CheckoutAsWorktree.Tracking
+- Text.CheckoutAsWorktree.WorktreePath
+- Text.CheckoutAsWorktree.WorktreePath.Placeholder
 - Text.CheckoutBranchFromStash
 - Text.CheckoutBranchFromStash.Branch
 - Text.CheckoutBranchFromStash.Stash
@@ -1611,7 +1795,6 @@ This document shows the translation status of each locale file in the repository
 - Text.CommitDetail.Info.CopyNameAndEmail
 - Text.CommitDetail.Info.Key
 - Text.CommitDetail.Info.Signer
-- Text.CommitMessageTextBox.Column
 - Text.CommitMessageTextBox.Placeholder
 - Text.CommitMessageTextBox.SubjectCount
 - Text.Compare.Changes
@@ -1790,7 +1973,7 @@ This document shows the translation status of each locale file in the repository
 - Text.Preferences.Git.UseLibsecret
 - Text.Preferences.Git.UseStashAndReapplyByDefault
 - Text.Preferences.Shell.Args
-- Text.Preferences.Shell.Args.Tip
+- Text.Preferences.Shell.Args.ToolTip
 - Text.Push.New
 - Text.Push.Revision
 - Text.Push.Revision.Title
@@ -1860,7 +2043,12 @@ This document shows the translation status of each locale file in the repository
 - Text.StashCM.ApplyFileChanges
 - Text.StashCM.Branch
 - Text.StashCM.CopyMessage
+- Text.Statistics.Commits
 - Text.Statistics.Tips
+- Text.Statistics.TopAuthors
+- Text.Statistics.TopAuthors.Count
+- Text.Statistics.TopAuthors.Percentage
+- Text.Statistics.TopAuthors.Tip
 - Text.Submodule.Branch
 - Text.Submodule.CopyBranch
 - Text.Submodule.Deinit
@@ -1891,6 +2079,11 @@ This document shows the translation status of each locale file in the repository
 - Text.TagCM.DeleteMultiple
 - Text.TagCM.Merge
 - Text.Terminate
+- Text.TrustRepository
+- Text.TrustRepository.CommandTip
+- Text.TrustRepository.Description
+- Text.TrustRepository.Path
+- Text.TrustRepository.ScanSkipped
 - Text.UpdateSubmodules.Recursive
 - Text.UpdateSubmodules.UpdateToRemoteTrackingBranch
 - Text.ViewLogs
@@ -1920,13 +2113,11 @@ This document shows the translation status of each locale file in the repository
 
 ### ![zh__CN](https://img.shields.io/badge/zh__CN-%E2%88%9A-brightgreen)
 
-### ![zh__TW](https://img.shields.io/badge/zh__TW-99.72%25-yellow)
+### ![zh__TW](https://img.shields.io/badge/zh__TW-99.91%25-yellow)
 
 <details>
 <summary>Missing keys in zh_TW.axaml</summary>
 
-- Text.CommitDetail.Files.Tips
-- Text.WorkingCopy.CollapseSidebar
-- Text.WorkingCopy.ExpandSidebar
+- Text.Preferences.Shell.Args.ToolTip
 
 </details>
